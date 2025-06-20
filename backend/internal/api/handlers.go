@@ -7,6 +7,13 @@ import (
 
 // RegisterRoutes adds all HTTP routes to the mux
 func RegisterRoutes(mux *http.ServeMux){
+
+	// Serve the Single page front-end
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "frontend/static/index.html")
+	})
+
+
 	mux.HandleFunc("/register", RegisterHandler)
 }
 
