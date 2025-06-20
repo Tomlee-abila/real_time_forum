@@ -16,6 +16,9 @@ func RegisterRoutes(mux *http.ServeMux){
 	// serve css
 	mux.Handle("/css/", http.StripPrefix("/css/", http.FileServer(http.Dir("frontend/static/css"))))
 
+	// serve js
+	mux.Handle("/js/", http.StripPrefix("/js/", http.FileServer(http.Dir("frontend/static/js"))))
+
 	mux.HandleFunc("/register", RegisterHandler)
 }
 
