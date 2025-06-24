@@ -1,7 +1,21 @@
+// @ts-check
 /**
  * Data isolation utilities to prevent circular references by creating completely new objects
  * This approach creates deep copies with only primitive values and plain objects
  */
+
+import {
+  SafeContentItem,
+  SafeWatchlistItem,
+  RawContentData,
+  isSafeContentItem,
+  isSafeWatchlistItem,
+  isDOMElement,
+  hasReactFiberProperties,
+  extractSafeString,
+  extractSafeNumber,
+  extractSafeBoolean
+} from '../types/content.ts';
 
 /**
  * Create a completely isolated copy of an object with only safe properties
@@ -73,15 +87,30 @@ export function createIsolatedCopy(obj) {
 
 /**
  * Create a safe watchlist item with guaranteed isolation
+ * @param {RawContentData} sourceItem - Raw content data that might be contaminated
+ * @returns {SafeWatchlistItem} - Guaranteed safe watchlist item
  */
 export function createSafeWatchlistItem(sourceItem) {
+  // Reject DOM elements immediately
+  if (isDOMElement(sourceItem)) {
+    console.warn('Rejected DOM element in createSafeWatchlistItem');
+    return createFallbackWatchlistItem();
+  }
+
+  // Reject objects with React fiber properties
+  if (hasReactFiberProperties(sourceItem)) {
+    console.warn('Rejected object with React fiber properties in createSafeWatchlistItem');
+    return createFallbackWatchlistItem();
+  }
+
   // Extract only the properties we need, ensuring they're primitives
+  /** @type {SafeWatchlistItem} */
   const safeItem = {
     id: null,
-    title: null,
+    title: '',
     poster_path: null,
     poster_url: null,
-    media_type: null,
+    media_type: 'movie',
     release_date: null,
     vote_average: null,
     overview: null,
@@ -90,103 +119,153 @@ export function createSafeWatchlistItem(sourceItem) {
   };
   
   try {
-    // Safely extract each property
+    // Safely extract each property using TypeScript utility functions
     if (sourceItem && typeof sourceItem === 'object') {
       // ID - ensure it's a number
-      if (sourceItem.id !== undefined && sourceItem.id !== null) {
-        const id = Number(sourceItem.id);
-        if (!isNaN(id)) {
-          safeItem.id = id;
-        }
+      const extractedId = extractSafeNumber(sourceItem.id);
+      if (extractedId !== null) {
+        safeItem.id = extractedId;
       }
-      
+
       // Title - ensure it's a string
       const title = sourceItem.title || sourceItem.name;
-      if (title && typeof title === 'string') {
-        safeItem.title = String(title).slice(0, 500); // Limit length
-      } else if (title) {
-        safeItem.title = String(title).slice(0, 500);
+      const extractedTitle = extractSafeString(title, 500);
+      if (extractedTitle !== null) {
+        safeItem.title = extractedTitle;
       }
       
       // Poster path - ensure it's a string
-      if (sourceItem.poster_path && typeof sourceItem.poster_path === 'string') {
-        safeItem.poster_path = String(sourceItem.poster_path).slice(0, 200);
+      const extractedPosterPath = extractSafeString(sourceItem.poster_path, 200);
+      if (extractedPosterPath !== null) {
+        safeItem.poster_path = extractedPosterPath;
       }
-      
+
       // Poster URL - ensure it's a string
-      if (sourceItem.poster_url && typeof sourceItem.poster_url === 'string') {
-        safeItem.poster_url = String(sourceItem.poster_url).slice(0, 500);
+      const extractedPosterUrl = extractSafeString(sourceItem.poster_url, 500);
+      if (extractedPosterUrl !== null) {
+        safeItem.poster_url = extractedPosterUrl;
       }
-      
-      // Media type - ensure it's a string
+
+      // Media type - ensure it's a valid string
       const mediaType = sourceItem.media_type || (sourceItem.title ? 'movie' : 'tv');
-      if (mediaType && typeof mediaType === 'string') {
-        safeItem.media_type = String(mediaType).slice(0, 20);
+      const extractedMediaType = extractSafeString(mediaType, 20);
+      if (extractedMediaType === 'movie' || extractedMediaType === 'tv') {
+        safeItem.media_type = extractedMediaType;
       }
-      
+
       // Release date - ensure it's a string
       const releaseDate = sourceItem.release_date || sourceItem.first_air_date;
-      if (releaseDate && typeof releaseDate === 'string') {
-        safeItem.release_date = String(releaseDate).slice(0, 50);
+      const extractedReleaseDate = extractSafeString(releaseDate, 50);
+      if (extractedReleaseDate !== null) {
+        safeItem.release_date = extractedReleaseDate;
       }
-      
+
       // Vote average - ensure it's a number
-      if (sourceItem.vote_average !== undefined && sourceItem.vote_average !== null) {
-        const rating = Number(sourceItem.vote_average);
-        if (!isNaN(rating)) {
-          safeItem.vote_average = rating;
-        }
+      const extractedVoteAverage = extractSafeNumber(sourceItem.vote_average);
+      if (extractedVoteAverage !== null) {
+        safeItem.vote_average = extractedVoteAverage;
       }
-      
+
       // Overview - ensure it's a string
-      if (sourceItem.overview && typeof sourceItem.overview === 'string') {
-        safeItem.overview = String(sourceItem.overview).slice(0, 2000); // Limit length
+      const extractedOverview = extractSafeString(sourceItem.overview, 2000);
+      if (extractedOverview !== null) {
+        safeItem.overview = extractedOverview;
       }
-      
+
       // Watched status
-      if (sourceItem.watched !== undefined) {
-        safeItem.watched = Boolean(sourceItem.watched);
-      }
-      
+      safeItem.watched = extractSafeBoolean(sourceItem.watched, false);
+
       // Added at timestamp
-      if (sourceItem.added_at && typeof sourceItem.added_at === 'string') {
-        safeItem.added_at = String(sourceItem.added_at);
+      const extractedAddedAt = extractSafeString(sourceItem.added_at);
+      if (extractedAddedAt !== null) {
+        safeItem.added_at = extractedAddedAt;
       }
     }
   } catch (error) {
     console.warn('Error creating safe watchlist item:', error);
-    // Return minimal safe item
-    return {
-      id: Date.now(), // Use timestamp as fallback ID
-      title: 'Unknown Title',
-      poster_path: null,
-      poster_url: null,
-      media_type: 'movie',
-      release_date: null,
-      vote_average: 0,
-      overview: null,
-      watched: false,
-      added_at: new Date().toISOString()
-    };
+    return createFallbackWatchlistItem();
   }
-  
+
+  // Validate the final item before returning
+  if (!isSafeWatchlistItem(safeItem)) {
+    console.warn('Created item failed safety validation, using fallback');
+    return createFallbackWatchlistItem();
+  }
+
   return safeItem;
 }
 
 /**
+ * Create a fallback watchlist item when all else fails
+ * @returns {SafeWatchlistItem}
+ */
+function createFallbackWatchlistItem() {
+  /** @type {SafeWatchlistItem} */
+  return {
+    id: Date.now(), // Use timestamp as fallback ID
+    title: 'Unknown Title',
+    poster_path: null,
+    poster_url: null,
+    media_type: 'movie',
+    release_date: null,
+    vote_average: null,
+    overview: null,
+    watched: false,
+    added_at: new Date().toISOString()
+  };
+}
+
+/**
  * Create a safe content item for navigation
+ * @param {RawContentData} sourceItem - Raw content data that might be contaminated
+ * @returns {SafeContentItem | null} - Safe content item or null if invalid
  */
 export function createSafeContentItem(sourceItem) {
   if (!sourceItem || typeof sourceItem !== 'object') {
     return null;
   }
-  
+
+  // Reject DOM elements immediately
+  if (isDOMElement(sourceItem)) {
+    console.warn('Rejected DOM element in createSafeContentItem');
+    return null;
+  }
+
+  // Reject objects with React fiber properties
+  if (hasReactFiberProperties(sourceItem)) {
+    console.warn('Rejected object with React fiber properties in createSafeContentItem');
+    return null;
+  }
+
   try {
-    return {
-      id: Number(sourceItem.id) || 0,
-      title: String(sourceItem.title || sourceItem.name || 'Unknown').slice(0, 200),
-      media_type: String(sourceItem.media_type || (sourceItem.title ? 'movie' : 'tv')).slice(0, 20)
+    const extractedId = extractSafeNumber(sourceItem.id);
+    const title = sourceItem.title || sourceItem.name;
+    const extractedTitle = extractSafeString(title, 200);
+    const mediaType = sourceItem.media_type || (sourceItem.title ? 'movie' : 'tv');
+    const extractedMediaType = extractSafeString(mediaType, 20);
+
+    if (extractedId === null || extractedTitle === null) {
+      return null;
+    }
+
+    if (extractedMediaType !== 'movie' && extractedMediaType !== 'tv') {
+      return null;
+    }
+
+    /** @type {SafeContentItem} */
+    const safeItem = {
+      id: extractedId,
+      title: extractedTitle,
+      media_type: extractedMediaType
     };
+
+    // Validate before returning
+    if (!isSafeContentItem(safeItem)) {
+      console.warn('Created content item failed safety validation');
+      return null;
+    }
+
+    return safeItem;
   } catch (error) {
     console.warn('Error creating safe content item:', error);
     return null;

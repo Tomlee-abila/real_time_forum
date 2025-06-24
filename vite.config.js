@@ -9,4 +9,15 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/tests/setup.js',
   },
+  resolve: {
+    alias: {
+      '@': '/src'
+    }
+  },
+  esbuild: {
+    // Allow TypeScript files to be processed
+    loader: 'tsx',
+    include: /\.(tsx?|jsx?)$/,
+    exclude: []
+  }
 })
