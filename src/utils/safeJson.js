@@ -16,10 +16,12 @@ export function safeStringify(obj, space = 0) {
     if (key.startsWith('__reactFiber') ||
         key.startsWith('__reactInternalInstance') ||
         key.startsWith('_reactInternalFiber') ||
+        key.startsWith('__reactEventHandlers') ||
         key === '_owner' ||
         key === '_store' ||
         key === 'ref' ||
-        key === 'key') {
+        key === 'key' ||
+        key === 'stateNode') {
       return undefined;
     }
 
@@ -28,21 +30,36 @@ export function safeStringify(obj, space = 0) {
       return undefined;
     }
 
-    // Handle circular references
+    // Handle circular references and problematic objects
     if (typeof value === 'object' && value !== null) {
+      // Check for circular references first
       if (seen.has(value)) {
         return '[Circular Reference]';
       }
       seen.add(value);
 
-      // Skip DOM elements
-      if (value instanceof Element || value instanceof Node) {
-        return undefined;
+      // Skip DOM elements and HTML elements
+      if (value instanceof Element ||
+          value instanceof Node ||
+          value instanceof HTMLElement ||
+          value instanceof HTMLButtonElement ||
+          (typeof HTMLElement !== 'undefined' && value instanceof HTMLElement)) {
+        return '[DOM Element]';
       }
 
       // Skip React synthetic events
       if (value.nativeEvent && value.currentTarget) {
-        return undefined;
+        return '[React Event]';
+      }
+
+      // Skip React fiber nodes
+      if (value.constructor && value.constructor.name === 'FiberNode') {
+        return '[React Fiber]';
+      }
+
+      // Skip objects that look like React components
+      if (value.$$typeof || value._reactInternalFiber || value.__reactInternalInstance) {
+        return '[React Component]';
       }
     }
 
@@ -74,43 +91,59 @@ export function cleanForSerialization(obj) {
   if (obj === null || obj === undefined) {
     return obj;
   }
-  
+
   if (typeof obj !== 'object') {
     return obj;
   }
-  
+
   if (Array.isArray(obj)) {
     return obj.map(cleanForSerialization);
   }
-  
+
   const cleaned = {};
-  
+
   for (const [key, value] of Object.entries(obj)) {
     // Skip React-specific properties
-    if (key.startsWith('__react') || 
+    if (key.startsWith('__react') ||
         key.startsWith('_react') ||
-        key === '_owner' || 
-        key === '_store' || 
-        key === 'ref' || 
-        key === 'key') {
+        key.startsWith('__reactFiber') ||
+        key === '_owner' ||
+        key === '_store' ||
+        key === 'ref' ||
+        key === 'key' ||
+        key === 'stateNode') {
       continue;
     }
-    
+
     // Skip functions
     if (typeof value === 'function') {
       continue;
     }
-    
-    // Skip DOM elements
-    if (value instanceof Element || value instanceof Node) {
+
+    // Skip DOM elements and HTML elements
+    if (value instanceof Element ||
+        value instanceof Node ||
+        value instanceof HTMLElement ||
+        value instanceof HTMLButtonElement ||
+        (typeof HTMLElement !== 'undefined' && value instanceof HTMLElement)) {
       continue;
     }
-    
+
     // Skip React synthetic events
     if (value && typeof value === 'object' && value.nativeEvent && value.currentTarget) {
       continue;
     }
-    
+
+    // Skip React fiber nodes
+    if (value && typeof value === 'object' && value.constructor && value.constructor.name === 'FiberNode') {
+      continue;
+    }
+
+    // Skip objects that look like React components
+    if (value && typeof value === 'object' && (value.$$typeof || value._reactInternalFiber || value.__reactInternalInstance)) {
+      continue;
+    }
+
     // Recursively clean nested objects
     if (typeof value === 'object' && value !== null) {
       cleaned[key] = cleanForSerialization(value);
@@ -118,7 +151,7 @@ export function cleanForSerialization(obj) {
       cleaned[key] = value;
     }
   }
-  
+
   return cleaned;
 }
 
