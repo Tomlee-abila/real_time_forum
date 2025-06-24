@@ -85,7 +85,13 @@ describe('ContentCard', () => {
     );
 
     fireEvent.click(screen.getByText('Test Movie').closest('.content-card'));
-    expect(handleClick).toHaveBeenCalledWith(mockItem);
+
+    // Should be called with a safe content item (only id, title, media_type)
+    expect(handleClick).toHaveBeenCalledWith({
+      id: 1,
+      title: 'Test Movie',
+      media_type: 'movie'
+    });
   });
 
   it('should add item to watchlist when plus button is clicked', () => {
