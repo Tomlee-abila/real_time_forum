@@ -139,7 +139,15 @@ function appReducer(state, action) {
     
     // Watchlist cases
     case ActionTypes.ADD_TO_WATCHLIST:
-      return { ...state, watchlist: [...state.watchlist, action.payload] };
+      // Additional safety check to prevent contaminated data from entering state
+      const payload = action.payload;
+      if (!payload || typeof payload !== 'object' ||
+          payload.nodeType !== undefined || payload.tagName !== undefined ||
+          payload.__reactFiber$a7039vqqld !== undefined) {
+        console.error('Rejected contaminated payload in ADD_TO_WATCHLIST:', payload);
+        return state;
+      }
+      return { ...state, watchlist: [...state.watchlist, payload] };
     case ActionTypes.REMOVE_FROM_WATCHLIST:
       return { 
         ...state, 

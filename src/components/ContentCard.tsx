@@ -58,9 +58,25 @@ const ContentCard: React.FC<ContentCardProps> = ({
     if (inWatchlist) {
       removeFromWatchlist(safeId);
     } else {
-      // Use emergency isolation to ensure no contamination
-      const safeItem = emergencyDataIsolation(item);
-      addToWatchlist(safeItem);
+      // Create a completely clean object with only the essential data
+      const cleanItem = {
+        id: safeId,
+        title: safeTitle,
+        poster_path: safePosterUrl ? null : item.poster_path, // Keep original path if no URL
+        poster_url: safePosterUrl,
+        media_type: safeMediaType,
+        release_date: safeReleaseDate,
+        vote_average: safeVoteAverage,
+        overview: safeOverview,
+        watched: false,
+        added_at: new Date().toISOString()
+      };
+
+      // Double-check with emergency isolation as backup
+      const safeItem = emergencyDataIsolation(cleanItem);
+      if (safeItem) {
+        addToWatchlist(safeItem);
+      }
     }
   });
 

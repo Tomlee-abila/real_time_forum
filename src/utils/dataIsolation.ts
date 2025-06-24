@@ -325,15 +325,22 @@ export function validateSafeForSerialization(obj) {
 
 /**
  * Emergency data isolation - strips everything except basic properties
+ * This is the most aggressive isolation to prevent any contamination
  */
 export function emergencyDataIsolation(data) {
+  // Immediately reject DOM elements and React components
+  if (isDOMElement(data) || hasReactFiberProperties(data)) {
+    console.warn('emergencyDataIsolation: Rejected DOM/React element');
+    return null;
+  }
+
   if (!data || typeof data !== 'object') {
     return data;
   }
 
   // For arrays, isolate each item
   if (Array.isArray(data)) {
-    return data.map(item => emergencyDataIsolation(item));
+    return data.map(item => emergencyDataIsolation(item)).filter(item => item !== null);
   }
 
   // For objects, only keep safe primitive properties
@@ -342,12 +349,18 @@ export function emergencyDataIsolation(data) {
                    'release_date', 'first_air_date', 'vote_average', 'overview', 'watched', 'added_at'];
 
   for (const key of safeKeys) {
-    if (data.hasOwnProperty(key)) {
-      const value = data[key];
-      if (typeof value === 'string' || typeof value === 'number' ||
-          typeof value === 'boolean' || value === null || value === undefined) {
-        isolated[key] = value;
+    try {
+      if (data.hasOwnProperty(key)) {
+        const value = data[key];
+        // Only allow primitive values
+        if (typeof value === 'string' || typeof value === 'number' ||
+            typeof value === 'boolean' || value === null || value === undefined) {
+          isolated[key] = value;
+        }
       }
+    } catch (error) {
+      // Skip any property that throws an error when accessed
+      console.warn(`emergencyDataIsolation: Skipped property ${key} due to error:`, error);
     }
   }
 

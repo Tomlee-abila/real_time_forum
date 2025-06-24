@@ -71,9 +71,25 @@ function DetailPage() {
     if (inWatchlist) {
       removeFromWatchlist(content.id);
     } else {
-      // Use emergency isolation to ensure no contamination
-      const safeContent = emergencyDataIsolation(content);
-      addToWatchlist(safeContent);
+      // Create a completely clean object with only essential data
+      const cleanContent = {
+        id: content.id,
+        title: content.title || content.name,
+        poster_path: content.poster_path,
+        poster_url: content.poster_url,
+        media_type: type,
+        release_date: content.release_date || content.first_air_date,
+        vote_average: content.vote_average,
+        overview: content.overview,
+        watched: false,
+        added_at: new Date().toISOString()
+      };
+
+      // Double-check with emergency isolation as backup
+      const safeContent = emergencyDataIsolation(cleanContent);
+      if (safeContent) {
+        addToWatchlist(safeContent);
+      }
     }
   });
 
