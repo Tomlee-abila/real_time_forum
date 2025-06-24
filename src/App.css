@@ -1,42 +1,221 @@
-#root {
-  max-width: 1280px;
+/* App Layout */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #f8fafc;
+}
+
+.app-header {
+  background: white;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 16px 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.app-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.app-main {
+  flex: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  width: 100%;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+.app-footer {
+  background: white;
+  border-top: 1px solid #e2e8f0;
+  padding: 16px 24px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* Home Page Styles */
+.home-page {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.hero-section {
+  text-align: center;
+  padding: 48px 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  color: white;
+  margin-bottom: 24px;
+}
+
+.hero-content {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.hero-title {
+  font-size: 48px;
+  font-weight: 800;
+  margin: 0 0 16px 0;
+  line-height: 1.2;
+}
+
+.hero-subtitle {
+  font-size: 18px;
+  opacity: 0.9;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.content-section {
+  margin-bottom: 32px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #111827;
+}
+
+.section-title h2 {
+  font-size: 24px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.section-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.time-filter {
+  padding: 8px 16px;
+  border: 1px solid #d1d5db;
+  background: white;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.time-filter:hover {
+  border-color: #3b82f6;
+}
+
+.time-filter.active {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+/* Search Page Styles */
+.search-page {
+  min-height: 400px;
+}
+
+.search-prompt {
+  text-align: center;
+  padding: 80px 24px;
+  color: #6b7280;
+}
+
+.search-prompt-icon {
+  margin-bottom: 24px;
+  opacity: 0.5;
+}
+
+.search-prompt h2 {
+  font-size: 24px;
+  color: #374151;
+  margin: 0 0 12px 0;
+}
+
+.search-prompt p {
+  font-size: 16px;
+  margin: 0;
+}
+
+.search-header {
+  margin-bottom: 32px;
+}
+
+.search-header h1 {
+  font-size: 28px;
+  color: #111827;
+  margin: 0 0 8px 0;
+}
+
+.search-info {
+  color: #6b7280;
+  font-size: 16px;
+  margin: 0;
+}
+
+.scroll-trigger {
+  height: 20px;
+  margin: 24px 0;
+}
+
+.end-of-results {
+  text-align: center;
+  padding: 24px;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header-content {
+    padding: 0 16px;
   }
-  to {
-    transform: rotate(360deg);
+
+  .app-main {
+    padding: 16px;
   }
-}
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+  .hero-title {
+    font-size: 32px;
   }
-}
 
-.card {
-  padding: 2em;
-}
+  .hero-subtitle {
+    font-size: 16px;
+  }
 
-.read-the-docs {
-  color: #888;
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .section-title h2 {
+    font-size: 20px;
+  }
 }
