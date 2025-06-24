@@ -1,10 +1,10 @@
 import { useCallback } from 'react';
 import { useApp } from '../contexts/AppContext';
 import { ActionTypes } from '../contexts/AppContext';
-import { 
-  createSafeWatchlistItem, 
-  validateSafeForSerialization, 
-  emergencyDataIsolation 
+import {
+  createSafeWatchlistItem,
+  validateSafeForSerialization,
+  emergencyDataIsolation
 } from '../utils/dataIsolation';
 import { 
   SafeWatchlistItem, 

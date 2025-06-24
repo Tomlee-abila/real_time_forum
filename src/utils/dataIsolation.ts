@@ -15,7 +15,7 @@ import {
   extractSafeString,
   extractSafeNumber,
   extractSafeBoolean
-} from '../types/content.ts';
+} from '../types/content';
 
 /**
  * Create a completely isolated copy of an object with only safe properties
