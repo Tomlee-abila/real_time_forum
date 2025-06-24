@@ -2,6 +2,7 @@ import React from 'react';
 import { Star, Calendar, Plus, Check, Eye, EyeOff } from 'lucide-react';
 import { useWatchlist } from '../hooks/useWatchlist';
 import { formatYear, formatRating, truncateText, getMediaTypeDisplay } from '../utils/formatters';
+import { cleanForSerialization } from '../utils/safeJson';
 
 function ContentCard({ item, onClick, showWatchlistControls = true }) {
   const { isInWatchlist, addToWatchlist, removeFromWatchlist, toggleWatched, getWatchlistItem } = useWatchlist();
@@ -20,7 +21,9 @@ function ContentCard({ item, onClick, showWatchlistControls = true }) {
     if (inWatchlist) {
       removeFromWatchlist(item.id);
     } else {
-      addToWatchlist(item);
+      // Clean the item data to remove any circular references before adding to watchlist
+      const cleanItem = cleanForSerialization(item);
+      addToWatchlist(cleanItem);
     }
   };
 
