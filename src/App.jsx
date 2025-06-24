@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AppProvider } from './contexts/AppContext';
 import { useSearch } from './hooks/useSearch';
@@ -8,6 +8,7 @@ import HomePage from './pages/HomePage';
 import SearchPage from './pages/SearchPage';
 import DetailPage from './pages/DetailPage';
 import WatchlistPage from './pages/WatchlistPage';
+import { installGlobalErrorHandlers } from './utils/errorHandler';
 import './App.css';
 import './styles/components.css';
 import './styles/themes.css';
@@ -64,6 +65,11 @@ function AppContent() {
 }
 
 function App() {
+  useEffect(() => {
+    // Install global error handlers for circular structure errors
+    installGlobalErrorHandlers();
+  }, []);
+
   return (
     <AppProvider>
       <Router>
