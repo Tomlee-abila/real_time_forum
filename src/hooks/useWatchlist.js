@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { useApp } from '../contexts/AppContext';
 import { ActionTypes } from '../contexts/AppContext';
-import { createSafeWatchlistItem, validateSafeForSerialization } from '../utils/dataIsolation';
+import { createSafeWatchlistItem, validateSafeForSerialization, emergencyDataIsolation } from '../utils/dataIsolation';
 
 export function useWatchlist() {
   const { state, dispatch } = useApp();
@@ -9,8 +9,11 @@ export function useWatchlist() {
   // Add item to watchlist
   const addToWatchlist = useCallback((item) => {
     try {
-      // Create a completely isolated safe watchlist item
-      const watchlistItem = createSafeWatchlistItem(item);
+      // First apply emergency isolation to strip any contamination
+      const emergencyCleanItem = emergencyDataIsolation(item);
+
+      // Then create a completely isolated safe watchlist item
+      const watchlistItem = createSafeWatchlistItem(emergencyCleanItem);
 
       // Validate the item is safe for serialization before dispatching
       if (!validateSafeForSerialization(watchlistItem)) {

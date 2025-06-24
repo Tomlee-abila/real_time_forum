@@ -26,6 +26,8 @@ import {
   formatRating,
   formatGenres
 } from '../utils/formatters';
+import { createSafeEventHandler } from '../utils/eventSanitizer';
+import { emergencyDataIsolation } from '../utils/dataIsolation';
 
 function DetailPage() {
   const { id, type } = useParams();
@@ -65,18 +67,19 @@ function DetailPage() {
     }
   };
 
-  const handleWatchlistToggle = () => {
+  const handleWatchlistToggle = createSafeEventHandler(() => {
     if (inWatchlist) {
       removeFromWatchlist(content.id);
     } else {
-      // Pass the raw content - addToWatchlist will handle isolation internally
-      addToWatchlist(content);
+      // Use emergency isolation to ensure no contamination
+      const safeContent = emergencyDataIsolation(content);
+      addToWatchlist(safeContent);
     }
-  };
+  });
 
-  const handleWatchedToggle = () => {
+  const handleWatchedToggle = createSafeEventHandler(() => {
     toggleWatched(content.id);
-  };
+  });
 
   const handleBack = () => {
     navigate(-1);

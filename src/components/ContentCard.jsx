@@ -2,7 +2,8 @@ import React from 'react';
 import { Star, Calendar, Plus, Check, Eye, EyeOff } from 'lucide-react';
 import { useWatchlist } from '../hooks/useWatchlist';
 import { formatYear, formatRating, truncateText, getMediaTypeDisplay } from '../utils/formatters';
-import { createSafeContentItem } from '../utils/dataIsolation';
+import { createSafeContentItem, emergencyDataIsolation } from '../utils/dataIsolation';
+import { createSafeEventHandler } from '../utils/eventSanitizer';
 
 function ContentCard({ item, onClick, showWatchlistControls = true }) {
   const { isInWatchlist, addToWatchlist, removeFromWatchlist, toggleWatched, getWatchlistItem } = useWatchlist();
@@ -16,22 +17,21 @@ function ContentCard({ item, onClick, showWatchlistControls = true }) {
   const mediaType = item.media_type || (item.title ? 'movie' : 'tv');
   const posterUrl = item.poster_url || (item.poster_path ? `https://image.tmdb.org/t/p/w500${item.poster_path}` : null);
 
-  const handleWatchlistToggle = (e) => {
-    e.stopPropagation();
+  const handleWatchlistToggle = createSafeEventHandler(() => {
     if (inWatchlist) {
       removeFromWatchlist(item.id);
     } else {
-      // Pass the raw item - addToWatchlist will handle isolation internally
-      addToWatchlist(item);
+      // Use emergency isolation to ensure no contamination
+      const safeItem = emergencyDataIsolation(item);
+      addToWatchlist(safeItem);
     }
-  };
+  });
 
-  const handleWatchedToggle = (e) => {
-    e.stopPropagation();
+  const handleWatchedToggle = createSafeEventHandler(() => {
     toggleWatched(item.id);
-  };
+  });
 
-  const handleCardClick = () => {
+  const handleCardClick = createSafeEventHandler(() => {
     if (onClick) {
       // Create a safe content item for navigation
       const safeItem = createSafeContentItem(item);
@@ -39,7 +39,7 @@ function ContentCard({ item, onClick, showWatchlistControls = true }) {
         onClick(safeItem);
       }
     }
-  };
+  });
 
   return (
     <div className="content-card" onClick={handleCardClick}>
