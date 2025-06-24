@@ -1,21 +1,44 @@
 import { useCallback } from 'react';
 import { useApp } from '../contexts/AppContext';
 import { ActionTypes } from '../contexts/AppContext';
-import { createSafeWatchlistItem } from '../utils/safeJson';
+import { createSafeWatchlistItem, validateSafeForSerialization } from '../utils/dataIsolation';
 
 export function useWatchlist() {
   const { state, dispatch } = useApp();
 
   // Add item to watchlist
   const addToWatchlist = useCallback((item) => {
-    // Create a safe watchlist item using the utility function
-    const watchlistItem = createSafeWatchlistItem({
-      ...item,
-      watched: false,
-      added_at: new Date().toISOString(),
-    });
+    try {
+      // Create a completely isolated safe watchlist item
+      const watchlistItem = createSafeWatchlistItem(item);
 
-    dispatch({ type: ActionTypes.ADD_TO_WATCHLIST, payload: watchlistItem });
+      // Validate the item is safe for serialization before dispatching
+      if (!validateSafeForSerialization(watchlistItem)) {
+        console.error('Watchlist item failed serialization validation:', watchlistItem);
+        return;
+      }
+
+      console.log('Adding safe watchlist item:', watchlistItem);
+      dispatch({ type: ActionTypes.ADD_TO_WATCHLIST, payload: watchlistItem });
+    } catch (error) {
+      console.error('Error adding item to watchlist:', error);
+
+      // Fallback: create minimal safe item
+      const fallbackItem = {
+        id: Date.now(),
+        title: 'Unknown Title',
+        poster_path: null,
+        poster_url: null,
+        media_type: 'movie',
+        release_date: null,
+        vote_average: 0,
+        overview: null,
+        watched: false,
+        added_at: new Date().toISOString()
+      };
+
+      dispatch({ type: ActionTypes.ADD_TO_WATCHLIST, payload: fallbackItem });
+    }
   }, [dispatch]);
 
   // Remove item from watchlist
