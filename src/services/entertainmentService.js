@@ -46,15 +46,34 @@ class EntertainmentService {
 
   // Enhance TMDB data with additional processing
   enhanceData(tmdbData) {
+    // Enhance cast with profile URLs
+    const enhancedCast = (tmdbData.credits?.cast?.slice(0, 10) || []).map(person => ({
+      ...person,
+      profile_url: this.tmdb.getImageUrl(person.profile_path, 'w185'),
+    }));
+
+    // Enhance similar and recommendations with poster URLs
+    const enhancedSimilar = (tmdbData.similar?.results || []).map(item => ({
+      ...item,
+      poster_url: this.tmdb.getPosterUrl(item.poster_path),
+      backdrop_url: this.tmdb.getBackdropUrl(item.backdrop_path),
+    }));
+
+    const enhancedRecommendations = (tmdbData.recommendations?.results || []).map(item => ({
+      ...item,
+      poster_url: this.tmdb.getPosterUrl(item.poster_path),
+      backdrop_url: this.tmdb.getBackdropUrl(item.backdrop_path),
+    }));
+
     return {
       ...tmdbData,
       poster_url: this.tmdb.getPosterUrl(tmdbData.poster_path),
       backdrop_url: this.tmdb.getBackdropUrl(tmdbData.backdrop_path),
-      cast: tmdbData.credits?.cast?.slice(0, 10) || [],
+      cast: enhancedCast,
       crew: tmdbData.credits?.crew || [],
       videos: tmdbData.videos?.results || [],
-      similar: tmdbData.similar?.results || [],
-      recommendations: tmdbData.recommendations?.results || [],
+      similar: enhancedSimilar,
+      recommendations: enhancedRecommendations,
     };
   }
 

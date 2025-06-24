@@ -40,10 +40,10 @@ const ContentCard: React.FC<ContentCardProps> = ({
 
   // Extract safe properties with TypeScript validation
   const safeId = typeof item.id === 'number' ? item.id : 0;
-  const safeTitle = typeof item.title === 'string' ? item.title : 
+  const safeTitle = typeof item.title === 'string' ? item.title :
                    typeof item.name === 'string' ? item.name : 'Unknown Title';
-  const safePosterPath = typeof item.poster_path === 'string' ? item.poster_path : null;
-  const safeMediaType = item.media_type === 'movie' || item.media_type === 'tv' ? 
+  const safePosterUrl = typeof item.poster_url === 'string' ? item.poster_url : null;
+  const safeMediaType = item.media_type === 'movie' || item.media_type === 'tv' ?
                        item.media_type : 'movie';
   const safeReleaseDate = typeof item.release_date === 'string' ? item.release_date :
                          typeof item.first_air_date === 'string' ? item.first_air_date : null;
@@ -78,10 +78,8 @@ const ContentCard: React.FC<ContentCardProps> = ({
     }
   });
 
-  // Safe poster URL construction
-  const posterUrl = safePosterPath 
-    ? `https://image.tmdb.org/t/p/w500${safePosterPath}`
-    : '/placeholder-poster.jpg';
+  // Use the poster URL that's already constructed by the entertainment service
+  const posterUrl = safePosterUrl || '/placeholder-poster.jpg';
 
   return (
     <div className="content-card" onClick={handleCardClick}>

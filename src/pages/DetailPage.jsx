@@ -312,9 +312,9 @@ function DetailPage() {
                     {content.cast.slice(0, 12).map(person => (
                       <div key={person.id} className="cast-member">
                         <div className="cast-photo">
-                          {person.profile_path ? (
+                          {person.profile_url ? (
                             <img
-                              src={`https://image.tmdb.org/t/p/w185${person.profile_path}`}
+                              src={person.profile_url}
                               alt={person.name}
                             />
                           ) : (
