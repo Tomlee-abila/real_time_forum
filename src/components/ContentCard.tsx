@@ -3,6 +3,7 @@ import { Star, Calendar, Plus, Check, Eye, EyeOff } from 'lucide-react';
 import { useWatchlist } from '../hooks/useWatchlist';
 import { formatYear, formatRating, truncateText, getMediaTypeDisplay } from '../utils/formatters';
 import { createSafeContentItem, emergencyDataIsolation } from '../utils/dataIsolation';
+import { createSafeWatchlistItem } from '../utils/nuclearDataCleaner';
 import { createSafeEventHandler } from '../utils/eventSanitizer';
 import { 
   SafeContentItem, 
@@ -58,33 +59,15 @@ const ContentCard: React.FC<ContentCardProps> = ({
     if (inWatchlist) {
       removeFromWatchlist(safeId);
     } else {
-      // Create a completely clean object using JSON serialization to strip any hidden properties
-      const rawItem = {
-        id: safeId,
-        title: safeTitle,
-        poster_path: safePosterUrl ? null : item.poster_path, // Keep original path if no URL
-        poster_url: safePosterUrl,
-        media_type: safeMediaType,
-        release_date: safeReleaseDate,
-        vote_average: safeVoteAverage,
-        overview: safeOverview,
-        watched: false,
-        added_at: new Date().toISOString()
-      };
+      // Use nuclear data cleaner for guaranteed safety
+      console.log('🧹 Creating nuclear-clean watchlist item...');
+      const safeItem = createSafeWatchlistItem(item);
 
-      try {
-        // Use JSON round-trip to completely clean the object
-        const cleanItem = JSON.parse(JSON.stringify(rawItem));
-
-        // Triple-check with emergency isolation as final backup
-        const safeItem = emergencyDataIsolation(cleanItem);
-        if (safeItem) {
-          addToWatchlist(safeItem);
-        } else {
-          console.warn('Failed to create safe watchlist item');
-        }
-      } catch (error) {
-        console.error('Failed to serialize watchlist item:', error);
+      if (safeItem) {
+        console.log('✅ Nuclear-clean item created:', safeItem);
+        addToWatchlist(safeItem);
+      } else {
+        console.error('❌ Failed to create nuclear-clean watchlist item');
       }
     }
   });

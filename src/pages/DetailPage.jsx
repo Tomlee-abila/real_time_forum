@@ -28,6 +28,7 @@ import {
 } from '../utils/formatters';
 import { createSafeEventHandler } from '../utils/eventSanitizer';
 import { emergencyDataIsolation } from '../utils/dataIsolation';
+import { createSafeWatchlistItem } from '../utils/nuclearDataCleaner';
 
 function DetailPage() {
   const { id, type } = useParams();
@@ -71,33 +72,15 @@ function DetailPage() {
     if (inWatchlist) {
       removeFromWatchlist(content.id);
     } else {
-      // Create a completely clean object using JSON serialization
-      const rawContent = {
-        id: content.id,
-        title: content.title || content.name,
-        poster_path: content.poster_path,
-        poster_url: content.poster_url,
-        media_type: type,
-        release_date: content.release_date || content.first_air_date,
-        vote_average: content.vote_average,
-        overview: content.overview,
-        watched: false,
-        added_at: new Date().toISOString()
-      };
+      // Use nuclear data cleaner for guaranteed safety
+      console.log('🧹 Creating nuclear-clean watchlist item from detail page...');
+      const safeContent = createSafeWatchlistItem(content);
 
-      try {
-        // Use JSON round-trip to completely clean the object
-        const cleanContent = JSON.parse(JSON.stringify(rawContent));
-
-        // Triple-check with emergency isolation as final backup
-        const safeContent = emergencyDataIsolation(cleanContent);
-        if (safeContent) {
-          addToWatchlist(safeContent);
-        } else {
-          console.warn('Failed to create safe watchlist item from detail page');
-        }
-      } catch (error) {
-        console.error('Failed to serialize watchlist item from detail page:', error);
+      if (safeContent) {
+        console.log('✅ Nuclear-clean item created from detail page:', safeContent);
+        addToWatchlist(safeContent);
+      } else {
+        console.error('❌ Failed to create nuclear-clean watchlist item from detail page');
       }
     }
   });
