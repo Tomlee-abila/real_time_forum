@@ -7,36 +7,19 @@ const config = {
     apiKey: import.meta.env.VITE_TMDB_API_KEY,
     imageBaseURL: import.meta.env.VITE_TMDB_IMAGE_BASE_URL,
   },
-  omdb: {
-    baseURL: import.meta.env.VITE_OMDB_BASE_URL,
-    apiKey: import.meta.env.VITE_OMDB_API_KEY,
-  },
 };
 
-// Create axios instances
+// Create axios instance
 const tmdbApi = axios.create({
   baseURL: config.tmdb.baseURL,
   timeout: 10000,
 });
 
-const omdbApi = axios.create({
-  baseURL: config.omdb.baseURL,
-  timeout: 10000,
-});
-
-// Request interceptors to add API keys
+// Request interceptor to add API key
 tmdbApi.interceptors.request.use((config) => {
   config.params = {
     ...config.params,
     api_key: config.tmdb.apiKey,
-  };
-  return config;
-});
-
-omdbApi.interceptors.request.use((config) => {
-  config.params = {
-    ...config.params,
-    apikey: config.omdb.apiKey,
   };
   return config;
 });
@@ -76,9 +59,4 @@ tmdbApi.interceptors.response.use(
   handleApiError
 );
 
-omdbApi.interceptors.response.use(
-  (response) => response,
-  handleApiError
-);
-
-export { tmdbApi, omdbApi, config };
+export { tmdbApi, config };
