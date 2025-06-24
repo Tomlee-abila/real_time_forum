@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import { safeStringify, safeParse, cleanForSerialization } from '../utils/safeJson';
+import { safeStringify, safeParse } from '../utils/safeJson';
+import { deepIsolate, validateSafeForSerialization } from '../utils/dataIsolation';
 
 // Initial state
 const initialState = {
@@ -225,62 +226,62 @@ export function AppProvider({ children }) {
     }
 
     try {
-      // First, clean the watchlist data to remove any circular references
-      const cleanedWatchlist = cleanForSerialization(state.watchlist);
-      const serializedWatchlist = safeStringify(cleanedWatchlist);
+      // First, deeply isolate the watchlist data to ensure no circular references
+      const isolatedWatchlist = deepIsolate(state.watchlist);
+
+      // Validate that the isolated data is safe for serialization
+      if (!validateSafeForSerialization(isolatedWatchlist)) {
+        throw new Error('Isolated watchlist data failed serialization validation');
+      }
+
+      // Use regular JSON.stringify since we've already isolated the data
+      const serializedWatchlist = JSON.stringify(isolatedWatchlist);
       localStorage.setItem('entertainment-watchlist', serializedWatchlist);
+
+      console.log('Successfully saved watchlist with data isolation');
     } catch (error) {
       console.error('Error saving watchlist to localStorage:', error);
 
       // Check if it's a circular structure error
       if (error.message && error.message.includes('circular structure')) {
-        console.warn('Detected circular structure error, attempting aggressive cleaning...');
+        console.warn('Detected circular structure error despite isolation, attempting primitive-only save...');
 
-        // Try ultra-aggressive cleaning
+        // Try primitive-only cleaning as last resort
         try {
-          const ultraCleanedWatchlist = state.watchlist.map(item => {
-            // Only keep primitive values and simple objects
-            const cleanItem = {};
-            for (const [key, value] of Object.entries(item)) {
+          const primitiveOnlyWatchlist = state.watchlist.map(item => {
+            const primitiveItem = {};
+
+            // Only include primitive values
+            for (const [key, value] of Object.entries(item || {})) {
               if (typeof value === 'string' ||
                   typeof value === 'number' ||
                   typeof value === 'boolean' ||
                   value === null) {
-                cleanItem[key] = value;
+                primitiveItem[key] = value;
               }
             }
-            return cleanItem;
+
+            // Ensure required fields exist
+            if (!primitiveItem.id) primitiveItem.id = Date.now() + Math.random();
+            if (!primitiveItem.title) primitiveItem.title = 'Unknown Title';
+            if (!primitiveItem.media_type) primitiveItem.media_type = 'movie';
+            if (primitiveItem.watched === undefined) primitiveItem.watched = false;
+            if (!primitiveItem.added_at) primitiveItem.added_at = new Date().toISOString();
+
+            return primitiveItem;
           });
 
-          localStorage.setItem('entertainment-watchlist', JSON.stringify(ultraCleanedWatchlist));
-          console.log('Successfully saved with ultra-aggressive cleaning');
+          localStorage.setItem('entertainment-watchlist', JSON.stringify(primitiveOnlyWatchlist));
+          console.log('Successfully saved with primitive-only cleaning');
           return;
-        } catch (ultraError) {
-          console.error('Ultra-aggressive cleaning also failed:', ultraError);
+        } catch (primitiveError) {
+          console.error('Primitive-only cleaning also failed:', primitiveError);
         }
       }
 
-      // Fallback: try to save a manually cleaned version
-      try {
-        const manuallyCleanedWatchlist = state.watchlist.map(item => ({
-          id: item.id,
-          title: item.title,
-          poster_path: item.poster_path,
-          poster_url: item.poster_url,
-          media_type: item.media_type,
-          release_date: item.release_date,
-          vote_average: item.vote_average,
-          overview: item.overview,
-          watched: item.watched,
-          added_at: item.added_at
-        }));
-        localStorage.setItem('entertainment-watchlist', JSON.stringify(manuallyCleanedWatchlist));
-      } catch (fallbackError) {
-        console.error('Fallback save also failed:', fallbackError);
-        // Last resort: clear the problematic data
-        console.warn('Clearing watchlist due to persistent serialization errors');
-        localStorage.removeItem('entertainment-watchlist');
-      }
+      // Last resort: clear the problematic data
+      console.warn('All serialization attempts failed, clearing watchlist');
+      localStorage.removeItem('entertainment-watchlist');
     }
   }, [state.watchlist]);
 
