@@ -218,6 +218,12 @@ export function AppProvider({ children }) {
 
   // Save watchlist to localStorage whenever it changes
   useEffect(() => {
+    // Skip saving if watchlist is empty to avoid unnecessary operations
+    if (state.watchlist.length === 0) {
+      localStorage.removeItem('entertainment-watchlist');
+      return;
+    }
+
     try {
       // First, clean the watchlist data to remove any circular references
       const cleanedWatchlist = cleanForSerialization(state.watchlist);
@@ -225,6 +231,35 @@ export function AppProvider({ children }) {
       localStorage.setItem('entertainment-watchlist', serializedWatchlist);
     } catch (error) {
       console.error('Error saving watchlist to localStorage:', error);
+
+      // Check if it's a circular structure error
+      if (error.message && error.message.includes('circular structure')) {
+        console.warn('Detected circular structure error, attempting aggressive cleaning...');
+
+        // Try ultra-aggressive cleaning
+        try {
+          const ultraCleanedWatchlist = state.watchlist.map(item => {
+            // Only keep primitive values and simple objects
+            const cleanItem = {};
+            for (const [key, value] of Object.entries(item)) {
+              if (typeof value === 'string' ||
+                  typeof value === 'number' ||
+                  typeof value === 'boolean' ||
+                  value === null) {
+                cleanItem[key] = value;
+              }
+            }
+            return cleanItem;
+          });
+
+          localStorage.setItem('entertainment-watchlist', JSON.stringify(ultraCleanedWatchlist));
+          console.log('Successfully saved with ultra-aggressive cleaning');
+          return;
+        } catch (ultraError) {
+          console.error('Ultra-aggressive cleaning also failed:', ultraError);
+        }
+      }
+
       // Fallback: try to save a manually cleaned version
       try {
         const manuallyCleanedWatchlist = state.watchlist.map(item => ({
