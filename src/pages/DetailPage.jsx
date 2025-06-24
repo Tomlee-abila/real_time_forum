@@ -15,7 +15,7 @@ import {
   EyeOff
 } from 'lucide-react';
 import { useContent } from '../hooks/useContent';
-import { useWatchlist } from '../hooks/useWatchlist.ts';
+import { useWatchlist } from '../hooks/useWatchlist';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
 import ContentGrid from '../components/ContentGrid';

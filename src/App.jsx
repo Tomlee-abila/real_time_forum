@@ -9,7 +9,6 @@ import SearchPage from './pages/SearchPage';
 import DetailPage from './pages/DetailPage';
 import WatchlistPage from './pages/WatchlistPage';
 import { installGlobalErrorHandlers } from './utils/errorHandler';
-import { installGlobalEventInterceptor } from './utils/globalEventInterceptor';
 import './App.css';
 import './styles/components.css';
 import './styles/themes.css';
@@ -69,9 +68,6 @@ function App() {
   useEffect(() => {
     // Install global error handlers for circular structure errors
     installGlobalErrorHandlers();
-
-    // Install global DOM event interceptor to prevent React fiber contamination
-    installGlobalEventInterceptor();
   }, []);
 
   return (

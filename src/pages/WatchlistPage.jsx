@@ -12,7 +12,7 @@ import {
   Calendar,
   Star
 } from 'lucide-react';
-import { useWatchlist } from '../hooks/useWatchlist.ts';
+import { useWatchlist } from '../hooks/useWatchlist';
 import ContentGrid from '../components/ContentGrid';
 import { formatDate } from '../utils/formatters';
 

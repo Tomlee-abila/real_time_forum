@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Page</title>
+</head>
+<body>
+    <h1>🎬 Entertainment Discovery - Test Page</h1>
+    <p>This is a test page to verify the server is working.</p>
+    <p>If you can see this, the Vite development server is running correctly.</p>
+    <p><a href="/">Go to Main Application</a></p>
+    
+    <script>
+        console.log('Test page loaded successfully');
+        
+        // Test if we can fetch the main page
+        fetch('/')
+            .then(response => response.text())
+            .then(html => {
+                console.log('Main page HTML length:', html.length);
+                if (html.includes('Entertainment Discovery')) {
+                    console.log('✅ Main page contains expected content');
+                } else {
+                    console.log('❌ Main page does not contain expected content');
+                }
+            })
+            .catch(error => {
+                console.error('❌ Error fetching main page:', error);
+            });
+    </script>
+</body>
+</html>
