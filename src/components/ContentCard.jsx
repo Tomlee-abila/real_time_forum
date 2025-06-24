@@ -34,7 +34,9 @@ function ContentCard({ item, onClick, showWatchlistControls = true }) {
 
   const handleCardClick = () => {
     if (onClick) {
-      onClick(item);
+      // Clean the item data to prevent any circular references from being passed
+      const cleanItem = cleanForSerialization(item);
+      onClick(cleanItem);
     }
   };
 
