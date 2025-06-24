@@ -26,7 +26,6 @@ import {
   formatRating,
   formatGenres
 } from '../utils/formatters';
-import { cleanForSerialization } from '../utils/safeJson';
 
 function DetailPage() {
   const { id, type } = useParams();
@@ -70,9 +69,8 @@ function DetailPage() {
     if (inWatchlist) {
       removeFromWatchlist(content.id);
     } else {
-      // Clean the content data to remove any circular references before adding to watchlist
-      const cleanContent = cleanForSerialization(content);
-      addToWatchlist(cleanContent);
+      // Pass the raw content - addToWatchlist will handle isolation internally
+      addToWatchlist(content);
     }
   };
 
