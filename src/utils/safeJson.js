@@ -17,11 +17,21 @@ export function safeStringify(obj, space = 0) {
         key.startsWith('__reactInternalInstance') ||
         key.startsWith('_reactInternalFiber') ||
         key.startsWith('__reactEventHandlers') ||
+        key.startsWith('__reactProps') ||
+        key.startsWith('__reactContainer') ||
         key === '_owner' ||
         key === '_store' ||
         key === 'ref' ||
         key === 'key' ||
-        key === 'stateNode') {
+        key === 'stateNode' ||
+        key === 'return' ||
+        key === 'child' ||
+        key === 'sibling' ||
+        key === 'alternate' ||
+        key === 'effectTag' ||
+        key === 'nextEffect' ||
+        key === 'firstEffect' ||
+        key === 'lastEffect') {
       return undefined;
     }
 
@@ -38,27 +48,41 @@ export function safeStringify(obj, space = 0) {
       }
       seen.add(value);
 
-      // Skip DOM elements and HTML elements
+      // Skip DOM elements and HTML elements more aggressively
       if (value instanceof Element ||
           value instanceof Node ||
           value instanceof HTMLElement ||
           value instanceof HTMLButtonElement ||
-          (typeof HTMLElement !== 'undefined' && value instanceof HTMLElement)) {
+          value instanceof HTMLDivElement ||
+          value instanceof HTMLSpanElement ||
+          value instanceof EventTarget ||
+          (typeof HTMLElement !== 'undefined' && value instanceof HTMLElement) ||
+          (value.nodeType && typeof value.nodeType === 'number') ||
+          (value.tagName && typeof value.tagName === 'string')) {
         return '[DOM Element]';
       }
 
-      // Skip React synthetic events
-      if (value.nativeEvent && value.currentTarget) {
+      // Skip React synthetic events more aggressively
+      if ((value.nativeEvent && value.currentTarget) ||
+          (value.type && value.target && value.preventDefault) ||
+          (value._reactName && value._targetInst)) {
         return '[React Event]';
       }
 
-      // Skip React fiber nodes
-      if (value.constructor && value.constructor.name === 'FiberNode') {
+      // Skip React fiber nodes more aggressively
+      if ((value.constructor && value.constructor.name === 'FiberNode') ||
+          (value.tag !== undefined && value.type !== undefined && value.stateNode !== undefined) ||
+          (value.elementType && value.pendingProps) ||
+          (value.memoizedProps && value.memoizedState !== undefined)) {
         return '[React Fiber]';
       }
 
-      // Skip objects that look like React components (but not regular objects with React properties)
-      if (value.$$typeof || (value._reactInternalFiber && !value.name && !value.title) || (value.__reactInternalInstance && !value.name && !value.title)) {
+      // Skip objects that look like React components
+      if (value.$$typeof ||
+          (value._reactInternalFiber && !value.name && !value.title) ||
+          (value.__reactInternalInstance && !value.name && !value.title) ||
+          (value.props && value.state && value.setState) ||
+          (value._reactInternalInstance && value.updater)) {
         return '[React Component]';
       }
     }
@@ -103,15 +127,25 @@ export function cleanForSerialization(obj) {
   const cleaned = {};
 
   for (const [key, value] of Object.entries(obj)) {
-    // Skip React-specific properties
+    // Skip React-specific properties more aggressively
     if (key.startsWith('__react') ||
         key.startsWith('_react') ||
         key.startsWith('__reactFiber') ||
+        key.startsWith('__reactProps') ||
+        key.startsWith('__reactContainer') ||
         key === '_owner' ||
         key === '_store' ||
         key === 'ref' ||
         key === 'key' ||
-        key === 'stateNode') {
+        key === 'stateNode' ||
+        key === 'return' ||
+        key === 'child' ||
+        key === 'sibling' ||
+        key === 'alternate' ||
+        key === 'effectTag' ||
+        key === 'nextEffect' ||
+        key === 'firstEffect' ||
+        key === 'lastEffect') {
       continue;
     }
 
@@ -120,22 +154,34 @@ export function cleanForSerialization(obj) {
       continue;
     }
 
-    // Skip DOM elements and HTML elements
+    // Skip DOM elements and HTML elements more aggressively
     if (value instanceof Element ||
         value instanceof Node ||
         value instanceof HTMLElement ||
         value instanceof HTMLButtonElement ||
-        (typeof HTMLElement !== 'undefined' && value instanceof HTMLElement)) {
+        value instanceof HTMLDivElement ||
+        value instanceof HTMLSpanElement ||
+        value instanceof EventTarget ||
+        (typeof HTMLElement !== 'undefined' && value instanceof HTMLElement) ||
+        (value && typeof value === 'object' && value.nodeType && typeof value.nodeType === 'number') ||
+        (value && typeof value === 'object' && value.tagName && typeof value.tagName === 'string')) {
       continue;
     }
 
-    // Skip React synthetic events
-    if (value && typeof value === 'object' && value.nativeEvent && value.currentTarget) {
+    // Skip React synthetic events more aggressively
+    if (value && typeof value === 'object' &&
+        ((value.nativeEvent && value.currentTarget) ||
+         (value.type && value.target && value.preventDefault) ||
+         (value._reactName && value._targetInst))) {
       continue;
     }
 
-    // Skip React fiber nodes
-    if (value && typeof value === 'object' && value.constructor && value.constructor.name === 'FiberNode') {
+    // Skip React fiber nodes more aggressively
+    if (value && typeof value === 'object' &&
+        ((value.constructor && value.constructor.name === 'FiberNode') ||
+         (value.tag !== undefined && value.type !== undefined && value.stateNode !== undefined) ||
+         (value.elementType && value.pendingProps) ||
+         (value.memoizedProps && value.memoizedState !== undefined))) {
       continue;
     }
 
@@ -144,8 +190,13 @@ export function cleanForSerialization(obj) {
       continue;
     }
 
-    // Skip objects that look like React components (but not regular objects with React properties)
-    if (value && typeof value === 'object' && (value.$$typeof || (value._reactInternalFiber && !value.name && !value.title) || (value.__reactInternalInstance && !value.name && !value.title))) {
+    // Skip objects that look like React components
+    if (value && typeof value === 'object' &&
+        (value.$$typeof ||
+         (value._reactInternalFiber && !value.name && !value.title) ||
+         (value.__reactInternalInstance && !value.name && !value.title) ||
+         (value.props && value.state && value.setState) ||
+         (value._reactInternalInstance && value.updater))) {
       continue;
     }
 
