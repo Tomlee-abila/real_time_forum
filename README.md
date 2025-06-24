@@ -42,7 +42,6 @@ A comprehensive movie and TV show discovery platform built with React and Vite. 
 - Node.js (v18 or higher)
 - npm or yarn
 - TMDB API key ([Get one here](https://www.themoviedb.org/settings/api))
-- OMDB API key ([Get one here](http://www.omdbapi.com/apikey.aspx))
 
 ### Installation
 
@@ -62,10 +61,9 @@ A comprehensive movie and TV show discovery platform built with React and Vite. 
    cp .env.example .env
    ```
 
-   Edit `.env` and add your API keys:
+   Edit `.env` and add your API key:
    ```env
    VITE_TMDB_API_KEY=your_tmdb_api_key_here
-   VITE_OMDB_API_KEY=your_omdb_api_key_here
    ```
 
 4. **Start the development server**
@@ -153,8 +151,7 @@ A comprehensive movie and TV show discovery platform built with React and Vite. 
 
 ### API Integration
 - **Axios** - HTTP client with interceptors and error handling
-- **TMDB API** - Primary source for movie and TV show data
-- **OMDB API** - Enhanced ratings and additional metadata
+- **TMDB API** - Comprehensive source for movie and TV show data
 
 ### Testing
 - **Vitest** - Fast unit testing framework
@@ -185,8 +182,7 @@ src/
 ├── services/           # API services and utilities
 │   ├── api.js                  # Base API configuration
 │   ├── tmdbService.js          # TMDB API integration
-│   ├── omdbService.js          # OMDB API integration
-│   └── entertainmentService.js # Combined service layer
+│   └── entertainmentService.js # Entertainment service layer
 ├── hooks/              # Custom React hooks
 │   ├── useSearch.js            # Search functionality
 │   ├── useWatchlist.js         # Watchlist management
@@ -209,13 +205,10 @@ src/
 ## 🔌 API Integration
 
 ### TMDB API
-- Primary source for movie/TV data
+- Comprehensive source for movie/TV data
 - Images and trending content
 - Genre information
-
-### OMDB API
-- Additional ratings and plot information
-- Fallback data source
+- Ratings and detailed metadata
 
 ## 🧪 Testing
 
@@ -247,5 +240,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 
 - [TMDB](https://www.themoviedb.org/) for providing comprehensive movie data
-- [OMDB](https://www.omdbapi.com/) for additional movie information
 - [Lucide React](https://lucide.dev/) for beautiful icons
