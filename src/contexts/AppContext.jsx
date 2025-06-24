@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
+import { safeStringify, safeParse } from '../utils/safeJson';
 
 // Initial state
 const initialState = {
@@ -183,17 +184,23 @@ export function AppProvider({ children }) {
     try {
       const savedWatchlist = localStorage.getItem('entertainment-watchlist');
       if (savedWatchlist) {
+        const parsedWatchlist = safeParse(savedWatchlist, []);
         dispatch({
           type: ActionTypes.SET_WATCHLIST,
-          payload: JSON.parse(savedWatchlist)
+          payload: parsedWatchlist
         });
       }
 
       const savedPreferences = localStorage.getItem('entertainment-preferences');
       if (savedPreferences) {
+        const parsedPreferences = safeParse(savedPreferences, {
+          defaultView: 'grid',
+          resultsPerPage: 20,
+          autoplay: false,
+        });
         dispatch({
           type: ActionTypes.SET_PREFERENCES,
-          payload: JSON.parse(savedPreferences)
+          payload: parsedPreferences
         });
       }
 
@@ -212,16 +219,36 @@ export function AppProvider({ children }) {
   // Save watchlist to localStorage whenever it changes
   useEffect(() => {
     try {
-      localStorage.setItem('entertainment-watchlist', JSON.stringify(state.watchlist));
+      const serializedWatchlist = safeStringify(state.watchlist);
+      localStorage.setItem('entertainment-watchlist', serializedWatchlist);
     } catch (error) {
       console.error('Error saving watchlist to localStorage:', error);
+      // Fallback: try to save a cleaned version
+      try {
+        const cleanedWatchlist = state.watchlist.map(item => ({
+          id: item.id,
+          title: item.title,
+          poster_path: item.poster_path,
+          poster_url: item.poster_url,
+          media_type: item.media_type,
+          release_date: item.release_date,
+          vote_average: item.vote_average,
+          overview: item.overview,
+          watched: item.watched,
+          added_at: item.added_at
+        }));
+        localStorage.setItem('entertainment-watchlist', JSON.stringify(cleanedWatchlist));
+      } catch (fallbackError) {
+        console.error('Fallback save also failed:', fallbackError);
+      }
     }
   }, [state.watchlist]);
 
   // Save preferences to localStorage whenever they change
   useEffect(() => {
     try {
-      localStorage.setItem('entertainment-preferences', JSON.stringify(state.preferences));
+      const serializedPreferences = safeStringify(state.preferences);
+      localStorage.setItem('entertainment-preferences', serializedPreferences);
     } catch (error) {
       console.error('Error saving preferences to localStorage:', error);
     }

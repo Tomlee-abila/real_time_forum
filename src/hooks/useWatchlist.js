@@ -1,24 +1,19 @@
 import { useCallback } from 'react';
 import { useApp } from '../contexts/AppContext';
 import { ActionTypes } from '../contexts/AppContext';
+import { createSafeWatchlistItem } from '../utils/safeJson';
 
 export function useWatchlist() {
   const { state, dispatch } = useApp();
 
   // Add item to watchlist
   const addToWatchlist = useCallback((item) => {
-    const watchlistItem = {
-      id: item.id,
-      title: item.title || item.name,
-      poster_path: item.poster_path,
-      poster_url: item.poster_url,
-      media_type: item.media_type || (item.title ? 'movie' : 'tv'),
-      release_date: item.release_date || item.first_air_date,
-      vote_average: item.vote_average,
-      overview: item.overview,
+    // Create a safe watchlist item using the utility function
+    const watchlistItem = createSafeWatchlistItem({
+      ...item,
       watched: false,
       added_at: new Date().toISOString(),
-    };
+    });
 
     dispatch({ type: ActionTypes.ADD_TO_WATCHLIST, payload: watchlistItem });
   }, [dispatch]);
