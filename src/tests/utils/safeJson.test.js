@@ -34,11 +34,40 @@ describe('safeJson utilities', () => {
         name: 'Test',
         __reactFiber$abc123: 'should be skipped',
         __reactInternalInstance: 'should be skipped',
+        stateNode: 'should be skipped',
         value: 123
       };
-      
+
       const result = safeStringify(obj);
       expect(result).toBe('{"name":"Test","value":123}');
+    });
+
+    it('should handle HTMLButtonElement and React fiber circular references', () => {
+      // Create a mock HTMLButtonElement-like object with circular reference
+      const mockButton = {
+        tagName: 'BUTTON',
+        constructor: { name: 'HTMLButtonElement' }
+      };
+
+      const mockFiber = {
+        constructor: { name: 'FiberNode' },
+        stateNode: mockButton
+      };
+
+      // Create circular reference
+      mockButton.__reactFiber$test = mockFiber;
+
+      const obj = {
+        name: 'Test',
+        button: mockButton,
+        fiber: mockFiber,
+        value: 123
+      };
+
+      const result = safeStringify(obj);
+      expect(result).toContain('"name":"Test"');
+      expect(result).toContain('"value":123');
+      expect(result).toContain('[React Fiber]');
     });
 
     it('should skip undefined values', () => {
@@ -166,16 +195,45 @@ describe('safeJson utilities', () => {
         _store: 'should be removed',
         ref: 'should be removed',
         key: 'should be removed',
+        stateNode: 'should be removed',
         value: 123,
         func: () => 'should be removed'
       };
 
       const result = cleanForSerialization(obj);
-      
+
       expect(result).toEqual({
         name: 'Test',
         value: 123
       });
+    });
+
+    it('should remove HTMLButtonElement and React fiber objects', () => {
+      const mockButton = {
+        tagName: 'BUTTON',
+        constructor: { name: 'HTMLButtonElement' }
+      };
+
+      const mockFiber = {
+        constructor: { name: 'FiberNode' },
+        stateNode: mockButton
+      };
+
+      const obj = {
+        name: 'Test',
+        button: mockButton,
+        fiber: mockFiber,
+        value: 123
+      };
+
+      const result = cleanForSerialization(obj);
+
+      expect(result).toEqual({
+        name: 'Test',
+        value: 123
+      });
+      expect(result).not.toHaveProperty('button');
+      expect(result).not.toHaveProperty('fiber');
     });
 
     it('should handle nested objects', () => {
