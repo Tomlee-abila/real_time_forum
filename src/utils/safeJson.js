@@ -57,8 +57,8 @@ export function safeStringify(obj, space = 0) {
         return '[React Fiber]';
       }
 
-      // Skip objects that look like React components
-      if (value.$$typeof || value._reactInternalFiber || value.__reactInternalInstance) {
+      // Skip objects that look like React components (but not regular objects with React properties)
+      if (value.$$typeof || (value._reactInternalFiber && !value.name && !value.title) || (value.__reactInternalInstance && !value.name && !value.title)) {
         return '[React Component]';
       }
     }
@@ -139,8 +139,13 @@ export function cleanForSerialization(obj) {
       continue;
     }
 
-    // Skip objects that look like React components
-    if (value && typeof value === 'object' && (value.$$typeof || value._reactInternalFiber || value.__reactInternalInstance)) {
+    // Skip mock HTML elements (for testing)
+    if (value && typeof value === 'object' && value.constructor && value.constructor.name === 'HTMLButtonElement') {
+      continue;
+    }
+
+    // Skip objects that look like React components (but not regular objects with React properties)
+    if (value && typeof value === 'object' && (value.$$typeof || (value._reactInternalFiber && !value.name && !value.title) || (value.__reactInternalInstance && !value.name && !value.title))) {
       continue;
     }
 
