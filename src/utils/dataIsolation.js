@@ -243,3 +243,34 @@ export function validateSafeForSerialization(obj) {
     throw error; // Re-throw non-circular errors
   }
 }
+
+/**
+ * Emergency data isolation - strips everything except basic properties
+ */
+export function emergencyDataIsolation(data) {
+  if (!data || typeof data !== 'object') {
+    return data;
+  }
+
+  // For arrays, isolate each item
+  if (Array.isArray(data)) {
+    return data.map(item => emergencyDataIsolation(item));
+  }
+
+  // For objects, only keep safe primitive properties
+  const isolated = {};
+  const safeKeys = ['id', 'title', 'name', 'type', 'media_type', 'poster_path', 'poster_url',
+                   'release_date', 'first_air_date', 'vote_average', 'overview', 'watched', 'added_at'];
+
+  for (const key of safeKeys) {
+    if (data.hasOwnProperty(key)) {
+      const value = data[key];
+      if (typeof value === 'string' || typeof value === 'number' ||
+          typeof value === 'boolean' || value === null || value === undefined) {
+        isolated[key] = value;
+      }
+    }
+  }
+
+  return isolated;
+}

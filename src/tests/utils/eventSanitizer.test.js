@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { 
+import {
   sanitizeEventHandler,
   createSafeEventHandler,
-  wrapComponentEventHandlers,
-  emergencyDataIsolation
+  wrapComponentEventHandlers
 } from '../../utils/eventSanitizer';
+import { emergencyDataIsolation } from '../../utils/dataIsolation';
 
 describe('eventSanitizer utilities', () => {
   beforeEach(() => {
