@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  ArrowLeft, 
-  Star, 
-  Calendar, 
-  Clock, 
-  Globe, 
-  DollarSign, 
+import {
+  ArrowLeft,
+  Star,
+  Calendar,
+  Clock,
+  Globe,
+  DollarSign,
   Award,
   Play,
   Plus,
@@ -19,13 +19,14 @@ import { useWatchlist } from '../hooks/useWatchlist';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
 import ContentGrid from '../components/ContentGrid';
-import { 
-  formatDate, 
-  formatRuntime, 
-  formatCurrency, 
+import {
+  formatDate,
+  formatRuntime,
+  formatCurrency,
   formatRating,
-  formatGenres 
+  formatGenres
 } from '../utils/formatters';
+import { cleanForSerialization } from '../utils/safeJson';
 
 function DetailPage() {
   const { id, type } = useParams();
@@ -69,7 +70,9 @@ function DetailPage() {
     if (inWatchlist) {
       removeFromWatchlist(content.id);
     } else {
-      addToWatchlist(content);
+      // Clean the content data to remove any circular references before adding to watchlist
+      const cleanContent = cleanForSerialization(content);
+      addToWatchlist(cleanContent);
     }
   };
 
