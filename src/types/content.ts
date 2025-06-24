@@ -125,15 +125,73 @@ export function hasReactFiberProperties(obj: unknown): boolean {
     return false;
   }
 
-  const keys = Object.keys(obj);
-  return keys.some(key => 
-    key.startsWith('__react') ||
-    key.startsWith('_react') ||
-    key === 'ref' ||
-    key === 'key' ||
-    key === '_owner' ||
-    key === '_store'
-  );
+  try {
+    const keys = Object.keys(obj);
+    return keys.some(key =>
+      key.startsWith('__react') ||
+      key.startsWith('_react') ||
+      key.includes('reactFiber') ||
+      key.includes('ReactFiber') ||
+      key.match(/^__react.*\$/) ||  // Matches __reactFiber$xxxxx pattern
+      key === 'ref' ||
+      key === 'key' ||
+      key === '_owner' ||
+      key === '_store' ||
+      key === 'stateNode' ||
+      key === 'return' ||
+      key === 'child' ||
+      key === 'sibling'
+    );
+  } catch (error) {
+    // If we can't access the keys, it's probably contaminated
+    return true;
+  }
+}
+
+/**
+ * Comprehensive contamination check - detects any potentially problematic objects
+ */
+export function isContaminated(obj: unknown): boolean {
+  if (!obj || typeof obj !== 'object') {
+    return false;
+  }
+
+  // Quick checks first
+  if (isDOMElement(obj) || hasReactFiberProperties(obj)) {
+    return true;
+  }
+
+  try {
+    // Check constructor name for suspicious patterns
+    const constructorName = obj.constructor?.name;
+    if (constructorName && (
+      constructorName.includes('HTML') ||
+      constructorName.includes('Element') ||
+      constructorName.includes('Fiber') ||
+      constructorName.includes('React') ||
+      constructorName === 'Node'
+    )) {
+      return true;
+    }
+
+    // Check for any property that might indicate React fiber or DOM contamination
+    const keys = Object.keys(obj);
+    const hasContaminatedKeys = keys.some(key =>
+      key.includes('fiber') ||
+      key.includes('Fiber') ||
+      key.includes('react') ||
+      key.includes('React') ||
+      key.includes('__') ||
+      key === 'nodeType' ||
+      key === 'tagName' ||
+      key === 'stateNode'
+    );
+
+    return hasContaminatedKeys;
+  } catch (error) {
+    // If we can't inspect the object safely, consider it contaminated
+    return true;
+  }
 }
 
 /**

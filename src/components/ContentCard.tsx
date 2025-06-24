@@ -58,8 +58,8 @@ const ContentCard: React.FC<ContentCardProps> = ({
     if (inWatchlist) {
       removeFromWatchlist(safeId);
     } else {
-      // Create a completely clean object with only the essential data
-      const cleanItem = {
+      // Create a completely clean object using JSON serialization to strip any hidden properties
+      const rawItem = {
         id: safeId,
         title: safeTitle,
         poster_path: safePosterUrl ? null : item.poster_path, // Keep original path if no URL
@@ -72,10 +72,19 @@ const ContentCard: React.FC<ContentCardProps> = ({
         added_at: new Date().toISOString()
       };
 
-      // Double-check with emergency isolation as backup
-      const safeItem = emergencyDataIsolation(cleanItem);
-      if (safeItem) {
-        addToWatchlist(safeItem);
+      try {
+        // Use JSON round-trip to completely clean the object
+        const cleanItem = JSON.parse(JSON.stringify(rawItem));
+
+        // Triple-check with emergency isolation as final backup
+        const safeItem = emergencyDataIsolation(cleanItem);
+        if (safeItem) {
+          addToWatchlist(safeItem);
+        } else {
+          console.warn('Failed to create safe watchlist item');
+        }
+      } catch (error) {
+        console.error('Failed to serialize watchlist item:', error);
       }
     }
   });

@@ -141,12 +141,27 @@ function appReducer(state, action) {
     case ActionTypes.ADD_TO_WATCHLIST:
       // Additional safety check to prevent contaminated data from entering state
       const payload = action.payload;
-      if (!payload || typeof payload !== 'object' ||
-          payload.nodeType !== undefined || payload.tagName !== undefined ||
-          payload.__reactFiber$a7039vqqld !== undefined) {
-        console.error('Rejected contaminated payload in ADD_TO_WATCHLIST:', payload);
+      if (!payload || typeof payload !== 'object') {
+        console.error('Rejected invalid payload in ADD_TO_WATCHLIST:', payload);
         return state;
       }
+
+      // Check for any React fiber properties (dynamic property names)
+      const keys = Object.keys(payload);
+      const hasReactFiber = keys.some(key =>
+        key.includes('reactFiber') ||
+        key.includes('ReactFiber') ||
+        key.startsWith('__react') ||
+        key === 'nodeType' ||
+        key === 'tagName' ||
+        key === 'stateNode'
+      );
+
+      if (hasReactFiber) {
+        console.error('Rejected contaminated payload with React fiber properties in ADD_TO_WATCHLIST:', keys);
+        return state;
+      }
+
       return { ...state, watchlist: [...state.watchlist, payload] };
     case ActionTypes.REMOVE_FROM_WATCHLIST:
       return { 

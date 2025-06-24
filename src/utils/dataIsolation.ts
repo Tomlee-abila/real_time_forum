@@ -12,6 +12,7 @@ import {
   isSafeWatchlistItem,
   isDOMElement,
   hasReactFiberProperties,
+  isContaminated,
   extractSafeString,
   extractSafeNumber,
   extractSafeBoolean
@@ -328,9 +329,9 @@ export function validateSafeForSerialization(obj) {
  * This is the most aggressive isolation to prevent any contamination
  */
 export function emergencyDataIsolation(data) {
-  // Immediately reject DOM elements and React components
-  if (isDOMElement(data) || hasReactFiberProperties(data)) {
-    console.warn('emergencyDataIsolation: Rejected DOM/React element');
+  // Immediately reject any contaminated objects
+  if (isContaminated(data)) {
+    console.warn('emergencyDataIsolation: Rejected contaminated object');
     return null;
   }
 
@@ -352,10 +353,16 @@ export function emergencyDataIsolation(data) {
     try {
       if (data.hasOwnProperty(key)) {
         const value = data[key];
-        // Only allow primitive values
+        // Only allow primitive values and reject any contaminated nested objects
         if (typeof value === 'string' || typeof value === 'number' ||
             typeof value === 'boolean' || value === null || value === undefined) {
           isolated[key] = value;
+        } else if (typeof value === 'object' && !isContaminated(value)) {
+          // For nested objects, recursively isolate
+          const nestedIsolated = emergencyDataIsolation(value);
+          if (nestedIsolated !== null) {
+            isolated[key] = nestedIsolated;
+          }
         }
       }
     } catch (error) {

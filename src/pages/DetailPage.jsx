@@ -71,8 +71,8 @@ function DetailPage() {
     if (inWatchlist) {
       removeFromWatchlist(content.id);
     } else {
-      // Create a completely clean object with only essential data
-      const cleanContent = {
+      // Create a completely clean object using JSON serialization
+      const rawContent = {
         id: content.id,
         title: content.title || content.name,
         poster_path: content.poster_path,
@@ -85,10 +85,19 @@ function DetailPage() {
         added_at: new Date().toISOString()
       };
 
-      // Double-check with emergency isolation as backup
-      const safeContent = emergencyDataIsolation(cleanContent);
-      if (safeContent) {
-        addToWatchlist(safeContent);
+      try {
+        // Use JSON round-trip to completely clean the object
+        const cleanContent = JSON.parse(JSON.stringify(rawContent));
+
+        // Triple-check with emergency isolation as final backup
+        const safeContent = emergencyDataIsolation(cleanContent);
+        if (safeContent) {
+          addToWatchlist(safeContent);
+        } else {
+          console.warn('Failed to create safe watchlist item from detail page');
+        }
+      } catch (error) {
+        console.error('Failed to serialize watchlist item from detail page:', error);
       }
     }
   });
