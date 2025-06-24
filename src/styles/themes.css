@@ -1,0 +1,348 @@
+/* Light Theme (Default) */
+:root[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f8fafc;
+  --bg-tertiary: #f1f5f9;
+  --text-primary: #111827;
+  --text-secondary: #374151;
+  --text-tertiary: #6b7280;
+  --border-primary: #e2e8f0;
+  --border-secondary: #d1d5db;
+  --accent-primary: #3b82f6;
+  --accent-secondary: #dbeafe;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --shadow: rgba(0, 0, 0, 0.1);
+  --shadow-lg: rgba(0, 0, 0, 0.15);
+}
+
+/* Dark Theme */
+:root[data-theme="dark"] {
+  --bg-primary: #1f2937;
+  --bg-secondary: #111827;
+  --bg-tertiary: #374151;
+  --text-primary: #f9fafb;
+  --text-secondary: #e5e7eb;
+  --text-tertiary: #9ca3af;
+  --border-primary: #374151;
+  --border-secondary: #4b5563;
+  --accent-primary: #60a5fa;
+  --accent-secondary: #1e3a8a;
+  --success: #34d399;
+  --warning: #fbbf24;
+  --error: #f87171;
+  --shadow: rgba(0, 0, 0, 0.3);
+  --shadow-lg: rgba(0, 0, 0, 0.5);
+}
+
+/* Apply theme variables */
+.app {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.app-header {
+  background: var(--bg-primary);
+  border-bottom-color: var(--border-primary);
+}
+
+.app-title {
+  color: var(--text-primary);
+}
+
+/* Search Bar Theme */
+.search-input-container {
+  background: var(--bg-primary);
+  border-color: var(--border-primary);
+}
+
+.search-input-container:focus-within {
+  border-color: var(--accent-primary);
+}
+
+.search-input {
+  background: transparent;
+  color: var(--text-primary);
+}
+
+.search-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.search-filters {
+  background: var(--bg-tertiary);
+  border-color: var(--border-primary);
+}
+
+.filter-option {
+  background: var(--bg-primary);
+  border-color: var(--border-secondary);
+  color: var(--text-secondary);
+}
+
+.filter-option.active {
+  background: var(--accent-primary);
+  color: white;
+}
+
+/* Content Cards Theme */
+.content-card {
+  background: var(--bg-primary);
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+.content-card:hover {
+  box-shadow: 0 8px 25px var(--shadow-lg);
+}
+
+.content-title {
+  color: var(--text-primary);
+}
+
+.content-meta {
+  color: var(--text-tertiary);
+}
+
+.content-overview {
+  color: var(--text-tertiary);
+}
+
+/* Navigation Theme */
+.navigation {
+  background: var(--bg-primary);
+  border-top-color: var(--border-primary);
+}
+
+.nav-item {
+  color: var(--text-tertiary);
+}
+
+.nav-item:hover {
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+}
+
+.nav-item.active {
+  color: var(--accent-primary);
+  background: var(--accent-secondary);
+}
+
+.theme-toggle {
+  color: var(--text-tertiary);
+}
+
+.theme-toggle:hover {
+  color: var(--text-secondary);
+  background: var(--bg-tertiary);
+}
+
+/* Detail Page Theme */
+.detail-page {
+  background: var(--bg-secondary);
+}
+
+.back-button {
+  background: var(--bg-primary);
+  border-color: var(--border-secondary);
+  color: var(--text-secondary);
+}
+
+.back-button:hover {
+  background: var(--bg-tertiary);
+}
+
+.detail-content {
+  background: var(--bg-primary);
+  box-shadow: 0 4px 16px var(--shadow);
+}
+
+.content-tabs {
+  background: var(--bg-tertiary);
+  border-bottom-color: var(--border-primary);
+}
+
+.tab-button {
+  color: var(--text-tertiary);
+}
+
+.tab-button:hover {
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+}
+
+.tab-button.active {
+  color: var(--accent-primary);
+  background: var(--bg-primary);
+}
+
+.overview-section h3,
+.ratings-section h3,
+.awards-section h3,
+.cast-section h3,
+.crew-section h3,
+.similar-section h3 {
+  color: var(--text-primary);
+}
+
+.plot-text {
+  color: var(--text-secondary);
+}
+
+.rating-item {
+  background: var(--bg-tertiary);
+}
+
+.rating-source {
+  color: var(--text-tertiary);
+}
+
+.rating-value {
+  color: var(--text-primary);
+}
+
+.awards-text {
+  color: var(--text-secondary);
+}
+
+.cast-name {
+  color: var(--text-primary);
+}
+
+.cast-character {
+  color: var(--text-tertiary);
+}
+
+.crew-member {
+  background: var(--bg-tertiary);
+}
+
+.crew-name {
+  color: var(--text-primary);
+}
+
+.crew-job {
+  color: var(--text-tertiary);
+}
+
+.detail-item {
+  background: var(--bg-tertiary);
+}
+
+.detail-label {
+  color: var(--text-tertiary);
+}
+
+.detail-value {
+  color: var(--text-primary);
+}
+
+/* Watchlist Page Theme */
+.watchlist-page {
+  background: var(--bg-secondary);
+}
+
+.header-title h1 {
+  color: var(--text-primary);
+}
+
+.item-count {
+  color: var(--text-tertiary);
+  background: var(--bg-tertiary);
+}
+
+.empty-watchlist {
+  color: var(--text-tertiary);
+}
+
+.empty-watchlist h2 {
+  color: var(--text-secondary);
+}
+
+.watchlist-stats,
+.watchlist-filters,
+.watchlist-content {
+  background: var(--bg-primary);
+  box-shadow: 0 2px 8px var(--shadow);
+}
+
+.stat-item {
+  background: var(--bg-tertiary);
+}
+
+.stat-value {
+  color: var(--text-primary);
+}
+
+.stat-label {
+  color: var(--text-tertiary);
+}
+
+.filter-label {
+  color: var(--text-secondary);
+}
+
+.filter-select {
+  background: var(--bg-primary);
+  border-color: var(--border-secondary);
+  color: var(--text-secondary);
+}
+
+.filter-select:focus {
+  border-color: var(--accent-primary);
+}
+
+/* Loading and Error Components Theme */
+.loading-message {
+  color: var(--text-tertiary);
+}
+
+.error-text {
+  color: var(--text-tertiary);
+}
+
+/* Home Page Theme */
+.hero-section {
+  /* Keep gradient as is for visual appeal */
+}
+
+.section-title {
+  color: var(--text-primary);
+}
+
+.time-filter {
+  background: var(--bg-primary);
+  border-color: var(--border-secondary);
+  color: var(--text-secondary);
+}
+
+.time-filter:hover {
+  border-color: var(--accent-primary);
+}
+
+.time-filter.active {
+  background: var(--accent-primary);
+  color: white;
+}
+
+/* Search Page Theme */
+.search-prompt {
+  color: var(--text-tertiary);
+}
+
+.search-prompt h2 {
+  color: var(--text-secondary);
+}
+
+.search-header h1 {
+  color: var(--text-primary);
+}
+
+.search-info {
+  color: var(--text-tertiary);
+}
+
+.end-of-results {
+  color: var(--text-tertiary);
+}

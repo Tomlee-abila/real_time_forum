@@ -37,17 +37,8 @@
   flex: 1;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 24px 24px 80px 24px; /* Add bottom padding for navigation */
   width: 100%;
-}
-
-.app-footer {
-  background: white;
-  border-top: 1px solid #e2e8f0;
-  padding: 16px 24px;
-  text-align: center;
-  color: #6b7280;
-  font-size: 14px;
 }
 
 /* Home Page Styles */

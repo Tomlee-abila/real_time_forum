@@ -1,21 +1,24 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AppProvider } from './contexts/AppContext';
 import { useSearch } from './hooks/useSearch';
 import SearchBar from './components/SearchBar';
+import Navigation from './components/Navigation';
 import HomePage from './pages/HomePage';
 import SearchPage from './pages/SearchPage';
+import DetailPage from './pages/DetailPage';
+import WatchlistPage from './pages/WatchlistPage';
 import './App.css';
 import './styles/components.css';
+import './styles/themes.css';
 
 function AppContent() {
   const { searchQuery } = useSearch();
-  const [selectedItem, setSelectedItem] = useState(null);
+  const navigate = useNavigate();
 
   const handleItemClick = (item) => {
-    setSelectedItem(item);
-    // TODO: Navigate to detail page or open modal
-    console.log('Item clicked:', item);
+    const mediaType = item.media_type || (item.title ? 'movie' : 'tv');
+    navigate(`/detail/${mediaType}/${item.id}`);
   };
 
   return (
@@ -39,13 +42,23 @@ function AppContent() {
               )
             }
           />
+          <Route
+            path="/search"
+            element={<SearchPage onItemClick={handleItemClick} />}
+          />
+          <Route
+            path="/detail/:type/:id"
+            element={<DetailPage />}
+          />
+          <Route
+            path="/watchlist"
+            element={<WatchlistPage />}
+          />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
 
-      <footer className="app-footer">
-        <p>&copy; 2024 Entertainment Discovery App. Built with React & TMDB API.</p>
-      </footer>
+      <Navigation />
     </div>
   );
 }
