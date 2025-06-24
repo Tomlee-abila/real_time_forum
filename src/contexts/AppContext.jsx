@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
-import { safeStringify, safeParse } from '../utils/safeJson';
+import { safeStringify, safeParse, cleanForSerialization } from '../utils/safeJson';
 
 // Initial state
 const initialState = {
@@ -219,13 +219,15 @@ export function AppProvider({ children }) {
   // Save watchlist to localStorage whenever it changes
   useEffect(() => {
     try {
-      const serializedWatchlist = safeStringify(state.watchlist);
+      // First, clean the watchlist data to remove any circular references
+      const cleanedWatchlist = cleanForSerialization(state.watchlist);
+      const serializedWatchlist = safeStringify(cleanedWatchlist);
       localStorage.setItem('entertainment-watchlist', serializedWatchlist);
     } catch (error) {
       console.error('Error saving watchlist to localStorage:', error);
-      // Fallback: try to save a cleaned version
+      // Fallback: try to save a manually cleaned version
       try {
-        const cleanedWatchlist = state.watchlist.map(item => ({
+        const manuallyCleanedWatchlist = state.watchlist.map(item => ({
           id: item.id,
           title: item.title,
           poster_path: item.poster_path,
@@ -237,9 +239,12 @@ export function AppProvider({ children }) {
           watched: item.watched,
           added_at: item.added_at
         }));
-        localStorage.setItem('entertainment-watchlist', JSON.stringify(cleanedWatchlist));
+        localStorage.setItem('entertainment-watchlist', JSON.stringify(manuallyCleanedWatchlist));
       } catch (fallbackError) {
         console.error('Fallback save also failed:', fallbackError);
+        // Last resort: clear the problematic data
+        console.warn('Clearing watchlist due to persistent serialization errors');
+        localStorage.removeItem('entertainment-watchlist');
       }
     }
   }, [state.watchlist]);
