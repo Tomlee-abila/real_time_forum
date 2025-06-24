@@ -168,6 +168,11 @@ export function useWatchlist() {
     });
   }, [state.watchlist]);
 
+  // Clear entire watchlist
+  const clearWatchlist = useCallback((): void => {
+    dispatch({ type: ActionTypes.CLEAR_WATCHLIST });
+  }, [dispatch]);
+
   return {
     watchlist: state.watchlist as SafeWatchlistItem[],
     addToWatchlist,
@@ -176,6 +181,7 @@ export function useWatchlist() {
     isInWatchlist,
     getWatchlistItem,
     getWatchlistStats,
-    filterWatchlist
+    filterWatchlist,
+    clearWatchlist
   };
 }
