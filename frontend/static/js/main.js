@@ -1,0 +1,1 @@
+// Main JS for initializing SPA and WebSocket client
