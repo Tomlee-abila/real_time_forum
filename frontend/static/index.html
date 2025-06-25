@@ -1,1 +1,113 @@
-<!-- Single HTML file for the SPA -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real Time Forum</title>
+    <link rel="stylesheet" href="/frontend/static/css/styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Navigation -->
+        <nav id="navbar" class="navbar">
+            <div class="nav-container">
+                <h1 class="nav-title">Real Time Forum</h1>
+                <div id="nav-links" class="nav-links">
+                    <!-- Navigation links will be populated by JavaScript -->
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main id="main-content" class="main-content">
+            <!-- Login Form -->
+            <div id="login-view" class="view">
+                <div class="auth-container">
+                    <h2>Login</h2>
+                    <form id="login-form" class="auth-form">
+                        <div class="form-group">
+                            <label for="login-email-nickname">Email or Nickname:</label>
+                            <input type="text" id="login-email-nickname" name="email_or_nickname" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="login-password">Password:</label>
+                            <input type="password" id="login-password" name="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Login</button>
+                        <div id="login-error" class="error-message"></div>
+                    </form>
+                    <p class="auth-switch">
+                        Don't have an account?
+                        <a href="#" id="show-register">Register here</a>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Registration Form -->
+            <div id="register-view" class="view hidden">
+                <div class="auth-container">
+                    <h2>Register</h2>
+                    <form id="register-form" class="auth-form">
+                        <div class="form-group">
+                            <label for="register-nickname">Nickname:</label>
+                            <input type="text" id="register-nickname" name="nickname" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-first-name">First Name:</label>
+                            <input type="text" id="register-first-name" name="first_name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-last-name">Last Name:</label>
+                            <input type="text" id="register-last-name" name="last_name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-age">Age:</label>
+                            <input type="number" id="register-age" name="age" min="1" max="120" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-gender">Gender:</label>
+                            <select id="register-gender" name="gender" required>
+                                <option value="">Select Gender</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-email">Email:</label>
+                            <input type="email" id="register-email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="register-password">Password:</label>
+                            <input type="password" id="register-password" name="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Register</button>
+                        <div id="register-error" class="error-message"></div>
+                    </form>
+                    <p class="auth-switch">
+                        Already have an account?
+                        <a href="#" id="show-login">Login here</a>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Home/Dashboard View -->
+            <div id="home-view" class="view hidden">
+                <div class="dashboard">
+                    <h2>Welcome to Real Time Forum</h2>
+                    <p>You are successfully logged in!</p>
+                    <div class="user-info">
+                        <h3>User Information</h3>
+                        <div id="user-details"></div>
+                    </div>
+                    <button id="logout-btn" class="btn btn-secondary">Logout</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- JavaScript Files -->
+    <script src="/frontend/static/js/auth.js"></script>
+    <script src="/frontend/static/js/main.js"></script>
+</body>
+</html>
