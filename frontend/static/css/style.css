@@ -1,0 +1,136 @@
+:root {
+    --color-white: hsl(252, 30%, 100%);
+    --color-light: hsl(255, 31%, 95%);
+    --color-gray: hsl(252, 15%, 65%);
+    --color-primary: #6b4ce6;
+    --color-secondary: hsl(252, 100%, 90%);
+    --color-success: hsl(120, 95%, 65%);
+    --color-danger: hsl(0, 95%, 65%);
+    --color-dark: hsl(252, 30%, 17%);
+    --color-black: hsl(252, 30%, 10%);
+
+    --border-radius: 2rem;
+    --card-border-radius: 1rem;
+    --btn-padding: 0.6rem 2rem;
+    --search-padding: 0.6rem 1rem;
+    --card-padding: 1rem;
+
+    --sticky-top-left: 5.4rem;
+    --sticky-top-right: -18rem;
+}
+
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    outline: 0;
+    box-sizing: border-box;
+    text-decoration: none;
+    list-style: none;
+    border: none;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: var(--color-dark);
+    background: var(--color-light);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+.container {
+    width: 100%;
+    max-width: 400px;
+    padding: 2rem;
+}
+
+.form-container {
+    background: var(--color-white);
+    padding: var(--card-padding) 2rem;
+    border-radius: var(--card-border-radius);
+    box-shadow: 0 0.5rem 1.5rem hsla(0, 0%, 0%, 0.1);
+    transition: all 300ms ease;
+}
+
+.form-container.hidden, #auth-container.hidden, #forum-page.hidden {
+    display: none;
+}
+
+.form-container h1 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: var(--color-dark);
+    font-size: 1.8rem;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+form input, form select {
+    width: 100%;
+    padding: var(--search-padding);
+    background: var(--color-light);
+    border-radius: calc(var(--card-border-radius) / 2);
+    border: 1px solid var(--color-light);
+    color: var(--color-dark);
+    font-size: 0.95rem;
+    font-family: inherit;
+}
+
+form input:focus, form select:focus {
+    border-color: var(--color-gray);
+}
+
+.btn {
+    display: inline-block;
+    padding: var(--btn-padding);
+    font-weight: 500;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: all 300ms ease;
+    font-size: 0.9rem;
+    font-family: inherit;
+}
+
+.btn-primary {
+    background: var(--color-primary);
+    color: var(--color-white);
+}
+
+.btn-primary:hover {
+    box-shadow: 0 0.3rem 1rem var(--color-secondary);
+}
+
+.form-container p {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: var(--color-gray);
+}
+
+.form-container p a {
+    color: var(--color-primary);
+    font-weight: 500;
+}
+
+.form-container p a:hover {
+    text-decoration: underline;
+}
+
+#forum-page .form-container p {
+    margin-top: 1rem;
+    font-size: 1.1rem;
+    text-align: left;
+}
+
+#logout-btn {
+    -margintop: 1.5rem;
+    width: 100%;
+}
