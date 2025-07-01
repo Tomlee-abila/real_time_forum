@@ -198,3 +198,8 @@ func GetCurrentUserHandler(w http.ResponseWriter, r *http.Request) {
 		"user": user,
 	})
 }
+
+// Helper functions
+func respondWithError(w http.ResponseWriter, code int, message string) {
+	respondWithJSON(w, code, map[string]string{"error": message})
+}
