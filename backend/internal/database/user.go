@@ -143,3 +143,14 @@ func ValidateUserCredentials(emailOrNickname, password string) (*models.User, er
 	user.Password = ""
 	return user, nil
 }
+
+// CheckEmailExists checks if an email already exists
+func CheckEmailExists(email string) (bool, error) {
+	query := "SELECT COUNT(*) FROM users WHERE email = ?"
+	var count int
+	err := DB.QueryRow(query, email).Scan(&count)
+	if err != nil {
+		return false, fmt.Errorf("failed to check email: %w", err)
+	}
+	return count > 0, nil
+}
