@@ -287,3 +287,29 @@ func DeletePost(postID, userID string) error {
 
 	return nil
 }
+
+// DeleteComment deletes a comment (only by the comment owner)
+func DeleteComment(commentID, userID string) error {
+	// First check if the comment exists and belongs to the user
+	query := "SELECT user_id FROM comments WHERE id = ?"
+	var commentOwnerID string
+	err := DB.QueryRow(query, commentID).Scan(&commentOwnerID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return fmt.Errorf("comment not found")
+		}
+		return fmt.Errorf("failed to check comment ownership: %w", err)
+	}
+
+	if commentOwnerID != userID {
+		return fmt.Errorf("unauthorized: you can only delete your own comments")
+	}
+
+	// Delete the comment
+	_, err = DB.Exec("DELETE FROM comments WHERE id = ?", commentID)
+	if err != nil {
+		return fmt.Errorf("failed to delete comment: %w", err)
+	}
+
+	return nil
+}
