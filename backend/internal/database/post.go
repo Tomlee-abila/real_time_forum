@@ -199,3 +199,37 @@ func CreateComment(userID, postID string, comment *models.CommentCreation) (*mod
 		UserNickname: user.Nickname,
 	}, nil
 }
+
+// GetCommentsByPostID retrieves all comments for a specific post
+func GetCommentsByPostID(postID string) ([]models.Comment, error) {
+	query := `
+        SELECT 
+            c.id, c.post_id, c.user_id, c.content, c.created_at,
+            u.nickname
+        FROM comments c
+        LEFT JOIN users u ON c.user_id = u.id
+        WHERE c.post_id = ?
+        ORDER BY c.created_at ASC
+    `
+
+	rows, err := DB.Query(query, postID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get comments: %w", err)
+	}
+	defer rows.Close()
+
+	var comments []models.Comment
+	for rows.Next() {
+		var comment models.Comment
+		err := rows.Scan(
+			&comment.ID, &comment.PostID, &comment.UserID, &comment.Content, &comment.CreatedAt,
+			&comment.UserNickname,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan comment: %w", err)
+		}
+		comments = append(comments, comment)
+	}
+
+	return comments, nil
+}
