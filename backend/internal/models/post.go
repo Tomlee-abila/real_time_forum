@@ -35,3 +35,8 @@ type PostCreation struct {
 	Content  string `json:"content"`
 	Category string `json:"category"`
 }
+
+// CommentCreation represents the data needed to create a comment
+type CommentCreation struct {
+	Content string `json:"content"`
+}
