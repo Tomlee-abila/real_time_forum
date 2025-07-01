@@ -104,3 +104,23 @@ func GetPostByID(postID string) (*models.Post, error) {
 
 	return &post, nil
 }
+
+// GetPostWithComments retrieves a post with all its comments
+func GetPostWithComments(postID string) (*models.PostWithComments, error) {
+	// Get the post
+	post, err := GetPostByID(postID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get comments for the post
+	comments, err := GetCommentsByPostID(postID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &models.PostWithComments{
+		Post:     *post,
+		Comments: comments,
+	}, nil
+}
