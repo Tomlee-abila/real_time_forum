@@ -27,3 +27,9 @@ type UserRegistration struct {
 	Email     string `json:"email"`
 	Password  string `json:"password"`
 }
+
+// UserLogin represents the data needed for user login
+type UserLogin struct {
+	EmailOrNickname string `json:"email_or_nickname"`
+	Password        string `json:"password"`
+}
