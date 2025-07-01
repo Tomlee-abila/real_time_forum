@@ -77,7 +77,7 @@ func (pc *PostCreation) Validate() error {
 		"movies", "books", "food", "travel", "science", "other",
 	}
 
-	if !contains(validCategories, strings.ToLower(pc.Category)) {
+	if !Contains(validCategories, strings.ToLower(pc.Category)) {
 		return errors.New("invalid category")
 	}
 
@@ -103,14 +103,4 @@ func GetValidCategories() []string {
 		"general", "technology", "gaming", "sports", "music",
 		"movies", "books", "food", "travel", "science", "other",
 	}
-}
-
-// Helper function (reuse from user.go or move to a common utils file)
-func contains(slice []string, item string) bool {
-	for _, s := range slice {
-		if s == item {
-			return true
-		}
-	}
-	return false
 }
