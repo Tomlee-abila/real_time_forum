@@ -1,6 +1,8 @@
 package models
 
 import (
+	"errors"
+	"strings"
 	"time"
 )
 
@@ -45,4 +47,39 @@ type CommentCreation struct {
 type PostWithComments struct {
 	Post     Post      `json:"post"`
 	Comments []Comment `json:"comments"`
+}
+
+// Validate validates the post creation data
+func (pc *PostCreation) Validate() error {
+	// Validate title
+	if strings.TrimSpace(pc.Title) == "" {
+		return errors.New("title is required")
+	}
+	if len(pc.Title) < 3 || len(pc.Title) > 100 {
+		return errors.New("title must be between 3 and 100 characters")
+	}
+
+	// Validate content
+	if strings.TrimSpace(pc.Content) == "" {
+		return errors.New("content is required")
+	}
+	if len(pc.Content) < 10 || len(pc.Content) > 5000 {
+		return errors.New("content must be between 10 and 5000 characters")
+	}
+
+	// Validate category
+	if strings.TrimSpace(pc.Category) == "" {
+		return errors.New("category is required")
+	}
+
+	validCategories := []string{
+		"general", "technology", "gaming", "sports", "music",
+		"movies", "books", "food", "travel", "science", "other",
+	}
+
+	if !contains(validCategories, strings.ToLower(pc.Category)) {
+		return errors.New("invalid category")
+	}
+
+	return nil
 }
