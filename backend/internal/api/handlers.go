@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/Tomlee-abila/real_time_forum/backend/internal/database"
@@ -134,5 +135,33 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, map[string]interface{}{
 		"message": "Login successful",
 		"user":    user,
+	})
+}
+
+// LogoutHandler handles user logout
+func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Get session token from cookie
+	token, err := utils.GetSessionFromRequest(r)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "No active session")
+		return
+	}
+
+	// Delete session from database
+	if err := utils.DeleteSession(token); err != nil {
+		// Even if deletion fails, clear the cookie
+		fmt.Printf("Failed to delete session: %v\n", err)
+	}
+
+	// Clear session cookie
+	utils.ClearSessionCookie(w)
+
+	respondWithJSON(w, http.StatusOK, map[string]string{
+		"message": "Logout successful",
 	})
 }
