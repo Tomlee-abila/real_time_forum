@@ -70,3 +70,26 @@ func GetUserByEmail(email string) (*models.User, error) {
 
 	return &user, nil
 }
+
+// GetUserByNickname retrieves a user by nickname
+func GetUserByNickname(nickname string) (*models.User, error) {
+	query := `
+        SELECT id, nickname, age, gender, first_name, last_name, email, password, created_at
+        FROM users WHERE nickname = ?
+    `
+
+	var user models.User
+	err := DB.QueryRow(query, nickname).Scan(
+		&user.ID, &user.Nickname, &user.Age, &user.Gender,
+		&user.FirstName, &user.LastName, &user.Email, &user.Password, &user.CreatedAt,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("user not found")
+		}
+		return nil, fmt.Errorf("failed to get user: %w", err)
+	}
+
+	return &user, nil
+}
