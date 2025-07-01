@@ -39,3 +39,40 @@ func CreatePost(userID string, post *models.PostCreation) (*models.Post, error) 
 		UserNickname: user.Nickname,
 	}, nil
 }
+
+// GetAllPosts retrieves all posts with user info and comment count (for feed)
+func GetAllPosts(limit, offset int) ([]models.Post, error) {
+	query := `
+        SELECT 
+            p.id, p.user_id, p.title, p.content, p.category, p.created_at,
+            u.nickname,
+            COUNT(c.id) as comment_count
+        FROM posts p
+        LEFT JOIN users u ON p.user_id = u.id
+        LEFT JOIN comments c ON p.id = c.post_id
+        GROUP BY p.id, p.user_id, p.title, p.content, p.category, p.created_at, u.nickname
+        ORDER BY p.created_at DESC
+        LIMIT ? OFFSET ?
+    `
+
+	rows, err := DB.Query(query, limit, offset)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get posts: %w", err)
+	}
+	defer rows.Close()
+
+	var posts []models.Post
+	for rows.Next() {
+		var post models.Post
+		err := rows.Scan(
+			&post.ID, &post.UserID, &post.Title, &post.Content, &post.Category, &post.CreatedAt,
+			&post.UserNickname, &post.CommentCount,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan post: %w", err)
+		}
+		posts = append(posts, post)
+	}
+
+	return posts, nil
+}
