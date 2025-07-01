@@ -1,6 +1,7 @@
 package database
 
 import (
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -45,4 +46,27 @@ func CreateUser(user *models.UserRegistration) (*models.User, error) {
 		Email:     user.Email,
 		CreatedAt: createdAt,
 	}, nil
+}
+
+// GetUserByEmail retrieves a user by email
+func GetUserByEmail(email string) (*models.User, error) {
+	query := `
+        SELECT id, nickname, age, gender, first_name, last_name, email, password, created_at
+        FROM users WHERE email = ?
+    `
+
+	var user models.User
+	err := DB.QueryRow(query, email).Scan(
+		&user.ID, &user.Nickname, &user.Age, &user.Gender,
+		&user.FirstName, &user.LastName, &user.Email, &user.Password, &user.CreatedAt,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("user not found")
+		}
+		return nil, fmt.Errorf("failed to get user: %w", err)
+	}
+
+	return &user, nil
 }
