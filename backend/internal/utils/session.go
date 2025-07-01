@@ -99,3 +99,12 @@ func SetSessionCookie(w http.ResponseWriter, token string) {
 	}
 	http.SetCookie(w, cookie)
 }
+
+// GetSessionFromRequest extracts session token from request cookie
+func GetSessionFromRequest(r *http.Request) (string, error) {
+	cookie, err := r.Cookie("session_token")
+	if err != nil {
+		return "", fmt.Errorf("no session cookie found")
+	}
+	return cookie.Value, nil
+}
