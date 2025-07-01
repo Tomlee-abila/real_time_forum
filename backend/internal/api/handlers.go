@@ -165,3 +165,36 @@ func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		"message": "Logout successful",
 	})
 }
+
+// GetCurrentUserHandler returns the current logged-in user
+func GetCurrentUserHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Get session token from cookie
+	token, err := utils.GetSessionFromRequest(r)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "No active session")
+		return
+	}
+
+	// Get session from database
+	session, err := utils.GetSessionByToken(token)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Invalid or expired session")
+		return
+	}
+
+	// Get user data
+	user, err := database.GetUserByID(session.UserID)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Failed to get user data")
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, map[string]interface{}{
+		"user": user,
+	})
+}
