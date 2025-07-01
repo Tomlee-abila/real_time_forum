@@ -93,3 +93,46 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		"user":    user,
 	})
 }
+
+// LoginHandler handles user login
+func LoginHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var loginData models.UserLogin
+	if err := json.NewDecoder(r.Body).Decode(&loginData); err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid JSON format")
+		return
+	}
+
+	// Validate input
+	if err := loginData.Validate(); err != nil {
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// Validate credentials
+	user, err := database.ValidateUserCredentials(loginData.EmailOrNickname, loginData.Password)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Invalid credentials")
+		return
+	}
+
+	// Create session
+	session, err := utils.CreateSession(user.ID)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Failed to create session")
+		return
+	}
+
+	// Set session cookie
+	utils.SetSessionCookie(w, session.Token)
+
+	// Respond with user data
+	respondWithJSON(w, http.StatusOK, map[string]interface{}{
+		"message": "Login successful",
+		"user":    user,
+	})
+}
