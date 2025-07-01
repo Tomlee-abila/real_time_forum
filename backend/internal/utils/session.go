@@ -44,3 +44,23 @@ func CreateSession(userID string) (*Session, error) {
 		ExpiresAt: expiresAt,
 	}, nil
 }
+
+// GetSessionByToken retrieves a session by token
+func GetSessionByToken(token string) (*Session, error) {
+	query := `
+        SELECT id, user_id, token, expires_at
+        FROM sessions 
+        WHERE token = ? AND expires_at > ?
+    `
+
+	var session Session
+	err := database.DB.QueryRow(query, token, time.Now()).Scan(
+		&session.ID, &session.UserID, &session.Token, &session.ExpiresAt,
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("session not found or expired")
+	}
+
+	return &session, nil
+}
