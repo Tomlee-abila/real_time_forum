@@ -244,3 +244,14 @@ func GetPostCount() (int, error) {
 	}
 	return count, nil
 }
+
+// GetPostCountByCategory returns the number of posts in a specific category
+func GetPostCountByCategory(category string) (int, error) {
+	query := "SELECT COUNT(*) FROM posts WHERE category = ?"
+	var count int
+	err := DB.QueryRow(query, category).Scan(&count)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get post count by category: %w", err)
+	}
+	return count, nil
+}
