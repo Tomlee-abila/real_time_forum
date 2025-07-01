@@ -28,3 +28,10 @@ type Comment struct {
 	// User information for display
 	UserNickname string `json:"user_nickname,omitempty"`
 }
+
+// PostCreation represents the data needed to create a post
+type PostCreation struct {
+	Title    string `json:"title"`
+	Content  string `json:"content"`
+	Category string `json:"category"`
+}
