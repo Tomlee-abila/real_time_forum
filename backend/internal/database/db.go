@@ -44,9 +44,9 @@ func runMigrations(filepath string) error {
 		return fmt.Errorf("failed to read migration file: %w", readErr)
 	}
 
-	_, err = DB.Exec(string(content))
-	if err != nil {
-		return fmt.Errorf("migration execution failed: %w", err)
+	_, execErr := DB.Exec(string(content))
+	if execErr != nil {
+		return fmt.Errorf("migration execution failed: %w", execErr)
 	}
 	return nil
 }
