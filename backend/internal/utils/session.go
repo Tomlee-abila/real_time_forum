@@ -108,3 +108,17 @@ func GetSessionFromRequest(r *http.Request) (string, error) {
 	}
 	return cookie.Value, nil
 }
+
+// ClearSessionCookie clears the session cookie (for logout)
+func ClearSessionCookie(w http.ResponseWriter) {
+	cookie := &http.Cookie{
+		Name:     "session_token",
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+	}
+	http.SetCookie(w, cookie)
+}
