@@ -96,3 +96,11 @@ func (cc *CommentCreation) Validate() error {
 
 	return nil
 }
+
+// GetValidCategories returns the list of valid post categories
+func GetValidCategories() []string {
+	return []string{
+		"general", "technology", "gaming", "sports", "music",
+		"movies", "books", "food", "travel", "science", "other",
+	}
+}
