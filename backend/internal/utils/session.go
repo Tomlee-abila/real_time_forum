@@ -64,3 +64,13 @@ func GetSessionByToken(token string) (*Session, error) {
 
 	return &session, nil
 }
+
+// DeleteSession deletes a session (for logout)
+func DeleteSession(token string) error {
+	query := "DELETE FROM sessions WHERE token = ?"
+	_, err := database.DB.Exec(query, token)
+	if err != nil {
+		return fmt.Errorf("failed to delete session: %w", err)
+	}
+	return nil
+}
