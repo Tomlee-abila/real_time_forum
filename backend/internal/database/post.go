@@ -1,6 +1,7 @@
 package database
 
 import (
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -75,4 +76,31 @@ func GetAllPosts(limit, offset int) ([]models.Post, error) {
 	}
 
 	return posts, nil
+}
+
+// GetPostByID retrieves a specific post by ID
+func GetPostByID(postID string) (*models.Post, error) {
+	query := `
+        SELECT 
+            p.id, p.user_id, p.title, p.content, p.category, p.created_at,
+            u.nickname
+        FROM posts p
+        LEFT JOIN users u ON p.user_id = u.id
+        WHERE p.id = ?
+    `
+
+	var post models.Post
+	err := DB.QueryRow(query, postID).Scan(
+		&post.ID, &post.UserID, &post.Title, &post.Content, &post.Category, &post.CreatedAt,
+		&post.UserNickname,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("post not found")
+		}
+		return nil, fmt.Errorf("failed to get post: %w", err)
+	}
+
+	return &post, nil
 }
