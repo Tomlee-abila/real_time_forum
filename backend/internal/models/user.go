@@ -1,6 +1,8 @@
 package models
 
 import (
+	"errors"
+	"strings"
 	"time"
 )
 
@@ -32,4 +34,54 @@ type UserRegistration struct {
 type UserLogin struct {
 	EmailOrNickname string `json:"email_or_nickname"`
 	Password        string `json:"password"`
+}
+
+// Validate validates the user registration data
+func (ur *UserRegistration) Validate() error {
+	// Validate nickname
+	if strings.TrimSpace(ur.Nickname) == "" {
+		return errors.New("nickname is required")
+	}
+	if len(ur.Nickname) < 3 || len(ur.Nickname) > 20 {
+		return errors.New("nickname must be between 3 and 20 characters")
+	}
+
+	// Validate age
+	if ur.Age < 13 || ur.Age > 120 {
+		return errors.New("age must be between 13 and 120")
+	}
+
+	// Validate gender
+	validGenders := []string{"male", "female", "other"}
+	if !contains(validGenders, strings.ToLower(ur.Gender)) {
+		return errors.New("gender must be male, female, or other")
+	}
+
+	// Validate first name
+	if strings.TrimSpace(ur.FirstName) == "" {
+		return errors.New("first name is required")
+	}
+	if len(ur.FirstName) > 50 {
+		return errors.New("first name must be less than 50 characters")
+	}
+
+	// Validate last name
+	if strings.TrimSpace(ur.LastName) == "" {
+		return errors.New("last name is required")
+	}
+	if len(ur.LastName) > 50 {
+		return errors.New("last name must be less than 50 characters")
+	}
+
+	// Validate email
+	if !isValidEmail(ur.Email) {
+		return errors.New("invalid email format")
+	}
+
+	// Validate password
+	if len(ur.Password) < 6 {
+		return errors.New("password must be at least 6 characters long")
+	}
+
+	return nil
 }
