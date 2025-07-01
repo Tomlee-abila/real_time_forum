@@ -255,3 +255,35 @@ func GetPostCountByCategory(category string) (int, error) {
 	}
 	return count, nil
 }
+
+// DeletePost deletes a post (only by the post owner)
+func DeletePost(postID, userID string) error {
+	// First check if the post exists and belongs to the user
+	query := "SELECT user_id FROM posts WHERE id = ?"
+	var postOwnerID string
+	err := DB.QueryRow(query, postID).Scan(&postOwnerID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return fmt.Errorf("post not found")
+		}
+		return fmt.Errorf("failed to check post ownership: %w", err)
+	}
+
+	if postOwnerID != userID {
+		return fmt.Errorf("unauthorized: you can only delete your own posts")
+	}
+
+	// Delete comments first (due to foreign key constraint)
+	_, err = DB.Exec("DELETE FROM comments WHERE post_id = ?", postID)
+	if err != nil {
+		return fmt.Errorf("failed to delete comments: %w", err)
+	}
+
+	// Delete the post
+	_, err = DB.Exec("DELETE FROM posts WHERE id = ?", postID)
+	if err != nil {
+		return fmt.Errorf("failed to delete post: %w", err)
+	}
+
+	return nil
+}
