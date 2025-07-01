@@ -39,9 +39,9 @@ func Init() {
 
 func runMigrations(filepath string) error {
 
-	content, err := os.ReadFile(filepath)
-	if err != nil {
-		return fmt.Errorf("failed to read migration file: %w", err)
+	content, readErr := os.ReadFile(filepath)
+	if readErr != nil {
+		return fmt.Errorf("failed to read migration file: %w", readErr)
 	}
 
 	_, err = DB.Exec(string(content))
