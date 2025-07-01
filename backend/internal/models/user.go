@@ -85,3 +85,14 @@ func (ur *UserRegistration) Validate() error {
 
 	return nil
 }
+
+// Validate validates the user login data
+func (ul *UserLogin) Validate() error {
+	if strings.TrimSpace(ul.EmailOrNickname) == "" {
+		return errors.New("email or nickname is required")
+	}
+	if strings.TrimSpace(ul.Password) == "" {
+		return errors.New("password is required")
+	}
+	return nil
+}
