@@ -99,7 +99,8 @@ func (ul *UserLogin) Validate() error {
 }
 
 // Helper functions
-func contains(slice []string, item string) bool {
+// Helper functions
+func Contains(slice []string, item string) bool {
 	for _, s := range slice {
 		if s == item {
 			return true
