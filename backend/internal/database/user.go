@@ -116,3 +116,30 @@ func GetUserByID(userID string) (*models.User, error) {
 
 	return &user, nil
 }
+
+// ValidateUserCredentials checks if the provided credentials are valid
+func ValidateUserCredentials(emailOrNickname, password string) (*models.User, error) {
+	var user *models.User
+	var err error
+
+	// Try to find user by email first, then by nickname
+	if isValidEmail(emailOrNickname) {
+		user, err = GetUserByEmail(emailOrNickname)
+	} else {
+		user, err = GetUserByNickname(emailOrNickname)
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("invalid credentials")
+	}
+
+	// Check password
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil {
+		return nil, fmt.Errorf("invalid credentials")
+	}
+
+	// Clear password before returning
+	user.Password = ""
+	return user, nil
+}
