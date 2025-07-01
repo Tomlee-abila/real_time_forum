@@ -93,3 +93,26 @@ func GetUserByNickname(nickname string) (*models.User, error) {
 
 	return &user, nil
 }
+
+// GetUserByID retrieves a user by ID
+func GetUserByID(userID string) (*models.User, error) {
+	query := `
+        SELECT id, nickname, age, gender, first_name, last_name, email, created_at
+        FROM users WHERE id = ?
+    `
+
+	var user models.User
+	err := DB.QueryRow(query, userID).Scan(
+		&user.ID, &user.Nickname, &user.Age, &user.Gender,
+		&user.FirstName, &user.LastName, &user.Email, &user.CreatedAt,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("user not found")
+		}
+		return nil, fmt.Errorf("failed to get user: %w", err)
+	}
+
+	return &user, nil
+}
