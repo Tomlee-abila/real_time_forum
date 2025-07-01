@@ -30,8 +30,8 @@ func Init() {
 	}
 
 	//Run migration
-	if err := runMigrations("migrations/001_init.sql"); err != nil {
-		log.Fatalf("Failed to run migrations: %v", err)
+	if migrateErr := runMigrations("migrations/001_init.sql"); migrateErr != nil {
+		log.Fatalf("Failed to run migrations: %v", migrateErr)
 	}
 
 	log.Println("Database initialized and migrations applied successfully.")
