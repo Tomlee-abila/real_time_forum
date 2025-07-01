@@ -165,3 +165,11 @@ func CheckNicknameExists(nickname string) (bool, error) {
 	}
 	return count > 0, nil
 }
+
+// Helper function to validate email format
+func isValidEmail(email string) bool {
+	// Simple email validation - you can use the same regex from models
+	return len(email) > 0 && len(email) < 255 &&
+		len(email) > 3 && email[len(email)-1] != '.' &&
+		email[0] != '.' && email[0] != '@'
+}
