@@ -83,3 +83,16 @@ func (pc *PostCreation) Validate() error {
 
 	return nil
 }
+
+// Validate validates the comment creation data
+func (cc *CommentCreation) Validate() error {
+	// Validate content
+	if strings.TrimSpace(cc.Content) == "" {
+		return errors.New("comment content is required")
+	}
+	if len(cc.Content) < 1 || len(cc.Content) > 1000 {
+		return errors.New("comment must be between 1 and 1000 characters")
+	}
+
+	return nil
+}
