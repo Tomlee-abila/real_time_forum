@@ -74,3 +74,13 @@ func DeleteSession(token string) error {
 	}
 	return nil
 }
+
+// CleanupExpiredSessions removes expired sessions from database
+func CleanupExpiredSessions() error {
+	query := "DELETE FROM sessions WHERE expires_at <= ?"
+	_, err := database.DB.Exec(query, time.Now())
+	if err != nil {
+		return fmt.Errorf("failed to cleanup sessions: %w", err)
+	}
+	return nil
+}
