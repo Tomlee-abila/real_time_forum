@@ -40,3 +40,9 @@ type PostCreation struct {
 type CommentCreation struct {
 	Content string `json:"content"`
 }
+
+// PostWithComments represents a post with its comments
+type PostWithComments struct {
+	Post     Post      `json:"post"`
+	Comments []Comment `json:"comments"`
+}
