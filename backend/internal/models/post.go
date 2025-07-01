@@ -17,3 +17,14 @@ type Post struct {
 	// Comment count for feed display
 	CommentCount int `json:"comment_count,omitempty"`
 }
+
+// Comment represents a comment on a post
+type Comment struct {
+	ID        string    `json:"id"`
+	PostID    string    `json:"post_id"`
+	UserID    string    `json:"user_id"`
+	Content   string    `json:"content"`
+	CreatedAt time.Time `json:"created_at"`
+	// User information for display
+	UserNickname string `json:"user_nickname,omitempty"`
+}
