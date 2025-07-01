@@ -162,3 +162,40 @@ func GetPostsByCategory(category string, limit, offset int) ([]models.Post, erro
 
 	return posts, nil
 }
+
+// CreateComment creates a new comment on a post
+func CreateComment(userID, postID string, comment *models.CommentCreation) (*models.Comment, error) {
+	// First check if post exists
+	_, err := GetPostByID(postID)
+	if err != nil {
+		return nil, fmt.Errorf("post not found")
+	}
+
+	commentID := uuid.New().String()
+	createdAt := time.Now()
+
+	query := `
+        INSERT INTO comments (id, post_id, user_id, content, created_at)
+        VALUES (?, ?, ?, ?, ?)
+    `
+
+	_, err = DB.Exec(query, commentID, postID, userID, comment.Content, createdAt)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create comment: %w", err)
+	}
+
+	// Get user nickname for response
+	user, err := GetUserByID(userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user info: %w", err)
+	}
+
+	return &models.Comment{
+		ID:           commentID,
+		PostID:       postID,
+		UserID:       userID,
+		Content:      comment.Content,
+		CreatedAt:    createdAt,
+		UserNickname: user.Nickname,
+	}, nil
+}
