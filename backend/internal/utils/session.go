@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/Tomlee-abila/real_time_forum/backend/internal/database"
@@ -83,4 +84,18 @@ func CleanupExpiredSessions() error {
 		return fmt.Errorf("failed to cleanup sessions: %w", err)
 	}
 	return nil
+}
+
+// SetSessionCookie sets the session cookie in the response
+func SetSessionCookie(w http.ResponseWriter, token string) {
+	cookie := &http.Cookie{
+		Name:     "session_token",
+		Value:    token,
+		Path:     "/",
+		MaxAge:   24 * 60 * 60, // 24 hours
+		HttpOnly: true,
+		Secure:   false, // Set to true in production with HTTPS
+		SameSite: http.SameSiteLaxMode,
+	}
+	http.SetCookie(w, cookie)
 }
