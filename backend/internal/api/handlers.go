@@ -210,3 +210,24 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	w.WriteHeader(code)
 	w.Write(response)
 }
+
+// Middleware to check authentication (for future use)
+func RequireAuth(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		token, err := utils.GetSessionFromRequest(r)
+		if err != nil {
+			respondWithError(w, http.StatusUnauthorized, "Authentication required")
+			return
+		}
+
+		session, err := utils.GetSessionByToken(token)
+		if err != nil {
+			respondWithError(w, http.StatusUnauthorized, "Invalid or expired session")
+			return
+		}
+
+		// Add user ID to request context for use in handlers
+		r.Header.Set("X-User-ID", session.UserID)
+		next(w, r)
+	}
+}
