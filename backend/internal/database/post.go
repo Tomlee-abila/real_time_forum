@@ -124,3 +124,41 @@ func GetPostWithComments(postID string) (*models.PostWithComments, error) {
 		Comments: comments,
 	}, nil
 }
+
+// GetPostsByCategory retrieves posts by category
+func GetPostsByCategory(category string, limit, offset int) ([]models.Post, error) {
+	query := `
+        SELECT 
+            p.id, p.user_id, p.title, p.content, p.category, p.created_at,
+            u.nickname,
+            COUNT(c.id) as comment_count
+        FROM posts p
+        LEFT JOIN users u ON p.user_id = u.id
+        LEFT JOIN comments c ON p.id = c.post_id
+        WHERE p.category = ?
+        GROUP BY p.id, p.user_id, p.title, p.content, p.category, p.created_at, u.nickname
+        ORDER BY p.created_at DESC
+        LIMIT ? OFFSET ?
+    `
+
+	rows, err := DB.Query(query, category, limit, offset)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get posts by category: %w", err)
+	}
+	defer rows.Close()
+
+	var posts []models.Post
+	for rows.Next() {
+		var post models.Post
+		err := rows.Scan(
+			&post.ID, &post.UserID, &post.Title, &post.Content, &post.Category, &post.CreatedAt,
+			&post.UserNickname, &post.CommentCount,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan post: %w", err)
+		}
+		posts = append(posts, post)
+	}
+
+	return posts, nil
+}
