@@ -233,3 +233,14 @@ func GetCommentsByPostID(postID string) ([]models.Comment, error) {
 
 	return comments, nil
 }
+
+// GetPostCount returns the total number of posts
+func GetPostCount() (int, error) {
+	query := "SELECT COUNT(*) FROM posts"
+	var count int
+	err := DB.QueryRow(query).Scan(&count)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get post count: %w", err)
+	}
+	return count, nil
+}
