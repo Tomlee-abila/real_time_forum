@@ -154,3 +154,14 @@ func CheckEmailExists(email string) (bool, error) {
 	}
 	return count > 0, nil
 }
+
+// CheckNicknameExists checks if a nickname already exists
+func CheckNicknameExists(nickname string) (bool, error) {
+	query := "SELECT COUNT(*) FROM users WHERE nickname = ?"
+	var count int
+	err := DB.QueryRow(query, nickname).Scan(&count)
+	if err != nil {
+		return false, fmt.Errorf("failed to check nickname: %w", err)
+	}
+	return count > 0, nil
+}
