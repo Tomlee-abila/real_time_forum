@@ -25,8 +25,8 @@ func Init() {
 	DB.SetConnMaxLifetime(0)
 
 	//Test the connection
-	if err := DB.Ping(); err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+	if pingErr := DB.Ping(); pingErr != nil {
+		log.Fatalf("Failed to connect to database: %v", pingErr)
 	}
 
 	//Run migration
