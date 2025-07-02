@@ -6,7 +6,18 @@ import (
 
 	"github.com/Tomlee-abila/real_time_forum/backend/internal/database"
 	"github.com/Tomlee-abila/real_time_forum/backend/internal/utils"
+	"github.com/gorilla/websocket"
 )
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+	CheckOrigin: func(r *http.Request) bool {
+		// Allow connections from any origin in development
+		// In production, you should check the origin properly
+		return true
+	},
+}
 
 // WebSocketHandler handles WebSocket upgrade requests
 func WebSocketHandler(hub *Hub, w http.ResponseWriter, r *http.Request) {
