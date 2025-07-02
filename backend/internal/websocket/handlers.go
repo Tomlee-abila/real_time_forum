@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 
-github.com/gorilla/websocket
 	"github.com/Tomlee-abila/real_time_forum/backend/internal/database"
 	"github.com/Tomlee-abila/real_time_forum/backend/internal/utils"
 )
