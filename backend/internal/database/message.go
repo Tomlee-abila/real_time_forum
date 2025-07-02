@@ -51,3 +51,59 @@ func CreateMessage(senderID string, message *models.MessageCreation) (*models.Me
 		ReceiverNickname: receiver.Nickname,
 	}, nil
 }
+
+// GetMessageHistory retrieves paginated message history between two users
+func GetMessageHistory(userID1, userID2 string, limit, offset int) (*models.MessageHistory, error) {
+	// Get messages between the two users
+	query := `
+        SELECT 
+            m.id, m.sender_id, m.receiver_id, m.content, m.created_at, m.is_read,
+            s.nickname as sender_nickname, r.nickname as receiver_nickname
+        FROM messages m
+        LEFT JOIN users s ON m.sender_id = s.id
+        LEFT JOIN users r ON m.receiver_id = r.id
+        WHERE (m.sender_id = ? AND m.receiver_id = ?) OR (m.sender_id = ? AND m.receiver_id = ?)
+        ORDER BY m.created_at DESC
+        LIMIT ? OFFSET ?
+    `
+
+	rows, err := DB.Query(query, userID1, userID2, userID2, userID1, limit, offset)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get message history: %w", err)
+	}
+	defer rows.Close()
+
+	var messages []models.Message
+	for rows.Next() {
+		var message models.Message
+		err := rows.Scan(
+			&message.ID, &message.SenderID, &message.ReceiverID, &message.Content,
+			&message.CreatedAt, &message.IsRead, &message.SenderNickname, &message.ReceiverNickname,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan message: %w", err)
+		}
+		messages = append(messages, message)
+	}
+
+	// Reverse the order to show oldest first (since we queried DESC for pagination)
+	for i, j := 0, len(messages)-1; i < j; i, j = i+1, j-1 {
+		messages[i], messages[j] = messages[j], messages[i]
+	}
+
+	// Get total count
+	totalCount, err := GetMessageCount(userID1, userID2)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get message count: %w", err)
+	}
+
+	// Check if there are more messages
+	hasMore := offset+len(messages) < totalCount
+
+	return &models.MessageHistory{
+		Messages:    messages,
+		HasMore:     hasMore,
+		TotalCount:  totalCount,
+		CurrentPage: (offset / limit) + 1,
+	}, nil
+}
