@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/Tomlee-abila/real_time_forum/backend/internal/database"
 	"github.com/Tomlee-abila/real_time_forum/backend/internal/models"
@@ -80,6 +81,40 @@ func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
 		"message": "Post created successfully",
 		"post":    post,
 	})
+}
+
+// PostDetailHandler handles /posts/{id} and /posts/{id}/comments
+func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
+	// Extract post ID from URL path
+	path := strings.TrimPrefix(r.URL.Path, "/posts/")
+	parts := strings.Split(path, "/")
+
+	if len(parts) == 0 || parts[0] == "" {
+		http.Error(w, "Post ID required", http.StatusBadRequest)
+		return
+	}
+
+	postID := parts[0]
+
+	// Check if this is a comment request
+	if len(parts) > 1 && parts[1] == "comments" {
+		if r.Method == http.MethodPost {
+			CreateCommentHandler(w, r, postID)
+		} else {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+		return
+	}
+
+	// Handle post detail requests
+	switch r.Method {
+	case http.MethodGet:
+		GetPostDetailHandler(w, r, postID)
+	case http.MethodDelete:
+		DeletePostHandler(w, r, postID)
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
 }
 
 // GetPostsHandler handles GET /posts - retrieve posts feed
