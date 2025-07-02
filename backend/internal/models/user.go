@@ -54,7 +54,7 @@ func (ur *UserRegistration) Validate() error {
 
 	// Validate gender
 	validGenders := []string{"male", "female", "other"}
-	if !contains(validGenders, strings.ToLower(ur.Gender)) {
+	if !Contains(validGenders, strings.ToLower(ur.Gender)) {
 		return errors.New("gender must be male, female, or other")
 	}
 
