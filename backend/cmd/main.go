@@ -6,7 +6,7 @@ import (
 
 	"github.com/Tomlee-abila/real_time_forum/backend/internal/api"
 	"github.com/Tomlee-abila/real_time_forum/backend/internal/database"
-github.com/Tomlee-abila/real_time_forum/backend/internal/websocket
+	"github.com/Tomlee-abila/real_time_forum/backend/internal/websocket"
 )
 
 func main() {
