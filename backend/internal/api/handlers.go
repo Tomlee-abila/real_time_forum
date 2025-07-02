@@ -35,6 +35,18 @@ func RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/categories", CategoriesHandler)
 }
 
+// PostsHandler handles GET /posts (get all posts) and POST /posts (create post)
+func PostsHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		GetPostsHandler(w, r)
+	case http.MethodPost:
+		CreatePostHandler(w, r)
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
 // RegisterHandler handles user registration
 func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
