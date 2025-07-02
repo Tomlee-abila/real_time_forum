@@ -42,3 +42,58 @@ type TypingEvent struct {
 	UserNickname string `json:"user_nickname"`
 	ReceiverID   string `json:"receiver_id"`
 }
+
+// UserStatusEvent represents user online/offline events
+type UserStatusEvent struct {
+	UserStatus interface{} `json:"user_status"`
+}
+
+// UserListEvent represents the list of online users
+type UserListEvent struct {
+	Users []interface{} `json:"users"`
+}
+
+// ErrorEvent represents error events
+type ErrorEvent struct {
+	Message string `json:"message"`
+	Code    int    `json:"code,omitempty"`
+}
+
+// ConnectedEvent represents successful connection
+type ConnectedEvent struct {
+	UserID  string `json:"user_id"`
+	Message string `json:"message"`
+}
+
+// MessageReadEvent represents message read confirmation
+type MessageReadEvent struct {
+	SenderID   string   `json:"sender_id"`
+	ReceiverID string   `json:"receiver_id"`
+	MessageIDs []string `json:"message_ids,omitempty"`
+}
+
+// CreateEvent creates a new WebSocket event
+func CreateEvent(eventType EventType, data interface{}, userID string) *Event {
+	return &Event{
+		Type:      eventType,
+		Data:      data,
+		Timestamp: "2025-01-01T00:00:00Z", // Will be set properly when we add time import
+		UserID:    userID,
+	}
+}
+
+// CreateErrorEvent creates an error event
+func CreateErrorEvent(message string, code int) *Event {
+	return CreateEvent(EventError, &ErrorEvent{
+		Message: message,
+		Code:    code,
+	}, "")
+}
+
+// CreateConnectedEvent creates a connected event
+func CreateConnectedEvent(userID string) *Event {
+	return CreateEvent(EventConnected, &ConnectedEvent{
+		UserID:  userID,
+		Message: "Successfully connected to WebSocket",
+	}, userID)
+}
