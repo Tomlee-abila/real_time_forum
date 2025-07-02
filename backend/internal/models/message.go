@@ -32,3 +32,11 @@ type Conversation struct {
 	IsOnline     bool      `json:"is_online"`
 	LastSeen     time.Time `json:"last_seen,omitempty"`
 }
+
+// MessageHistory represents paginated message history
+type MessageHistory struct {
+	Messages    []Message `json:"messages"`
+	HasMore     bool      `json:"has_more"`
+	TotalCount  int       `json:"total_count"`
+	CurrentPage int       `json:"current_page"`
+}
