@@ -40,3 +40,12 @@ type MessageHistory struct {
 	TotalCount  int       `json:"total_count"`
 	CurrentPage int       `json:"current_page"`
 }
+
+// UserStatus represents online/offline status
+type UserStatus struct {
+	UserID     string    `json:"user_id"`
+	Nickname   string    `json:"nickname"`
+	IsOnline   bool      `json:"is_online"`
+	LastSeen   time.Time `json:"last_seen"`
+	LastActive time.Time `json:"last_active"`
+}
