@@ -33,7 +33,6 @@ func Init() {
 	migrations := []string{
 		"migrations/001_init.sql",
 		"migrations/002_add_user_status.sql",
-		"migrations/003_add_message_read_status.sql",
 	}
 
 	for _, migrationFile := range migrations {
