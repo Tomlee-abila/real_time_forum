@@ -1,6 +1,8 @@
 package models
 
 import (
+	"errors"
+	"strings"
 	"time"
 )
 
@@ -63,4 +65,22 @@ type MessageEvent struct {
 	Message    *Message    `json:"message,omitempty"`
 	UserStatus *UserStatus `json:"user_status,omitempty"`
 	UserID     string      `json:"user_id,omitempty"`
+}
+
+// Validate validates the message creation data
+func (mc *MessageCreation) Validate() error {
+	// Validate receiver ID
+	if strings.TrimSpace(mc.ReceiverID) == "" {
+		return errors.New("receiver ID is required")
+	}
+
+	// Validate content
+	if strings.TrimSpace(mc.Content) == "" {
+		return errors.New("message content is required")
+	}
+	if len(mc.Content) > 1000 {
+		return errors.New("message content must be less than 1000 characters")
+	}
+
+	return nil
 }
