@@ -10,10 +10,16 @@ import (
 	"github.com/Tomlee-abila/real_time_forum/backend/internal/database"
 	"github.com/Tomlee-abila/real_time_forum/backend/internal/models"
 	"github.com/Tomlee-abila/real_time_forum/backend/internal/utils"
+	"github.com/Tomlee-abila/real_time_forum/backend/internal/websocket"
 )
 
+// Global WebSocket hub reference
+var wsHub *websocket.Hub
+
 // RegisterRoutes adds all HTTP routes to the mux
-func RegisterRoutes(mux *http.ServeMux) {
+func RegisterRoutes(mux *http.ServeMux, hub *websocket.Hub) {
+	// Store hub reference for use in handlers
+	wsHub = hub
 	// Serve the Single page front-end
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "frontend/static/index.html")
@@ -609,8 +615,11 @@ func CreateMessageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO: Broadcast message via WebSocket when we integrate the hub
-	// For now, just return the created message
+	// Broadcast message via WebSocket if hub is available
+	if wsHub != nil {
+		messageEvent := websocket.CreateMessageEvent(message)
+		wsHub.BroadcastMessageFromAPI(messageEvent, message.ReceiverID)
+	}
 
 	respondWithJSON(w, http.StatusCreated, map[string]interface{}{
 		"message": "Message sent successfully",

@@ -19,7 +19,7 @@ func main() {
 
 	// Register routes
 	mux := http.NewServeMux()
-	api.RegisterRoutes(mux)
+	api.RegisterRoutes(mux, hub)
 
 	// Add WebSocket endpoint
 	mux.HandleFunc("/ws", websocket.CreateWebSocketHandler(hub))

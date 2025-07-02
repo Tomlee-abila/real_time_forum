@@ -97,3 +97,10 @@ func CreateConnectedEvent(userID string) *Event {
 		Message: "Successfully connected to WebSocket",
 	}, userID)
 }
+
+// CreateMessageEvent creates a new message event
+func CreateMessageEvent(message interface{}) *Event {
+	return CreateEvent(EventNewMessage, &MessageEvent{
+		Message: message,
+	}, "")
+}

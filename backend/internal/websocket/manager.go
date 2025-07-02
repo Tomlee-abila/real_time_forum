@@ -141,3 +141,20 @@ func (h *Hub) sendToAll(event *Event) {
 		h.sendToClient(client, event)
 	}
 }
+
+// BroadcastMessageFromAPI broadcasts a message from API (not from WebSocket client)
+func (h *Hub) BroadcastMessageFromAPI(event *Event, targetUserID string) {
+	broadcastMsg := &BroadcastMessage{
+		event:      event,
+		targetUser: targetUserID,
+		sender:     nil, // No sender client for API calls
+	}
+
+	select {
+	case h.broadcast <- broadcastMsg:
+		// Message queued for broadcast
+	default:
+		// Hub broadcast channel is full, log but continue
+		log.Printf("Hub broadcast channel full, message dropped")
+	}
+}
