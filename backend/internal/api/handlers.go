@@ -48,6 +48,40 @@ func PostsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// CreatePostHandler handles POST /posts - create new post
+func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
+	// Get user from session
+	userID, err := getUserIDFromSession(r)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Authentication required")
+		return
+	}
+
+	var postData models.PostCreation
+	if err := json.NewDecoder(r.Body).Decode(&postData); err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid JSON format")
+		return
+	}
+
+	// Validate input
+	if err := postData.Validate(); err != nil {
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// Create post
+	post, err := database.CreatePost(userID, &postData)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Failed to create post")
+		return
+	}
+
+	respondWithJSON(w, http.StatusCreated, map[string]interface{}{
+		"message": "Post created successfully",
+		"post":    post,
+	})
+}
+
 // GetPostsHandler handles GET /posts - retrieve posts feed
 func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 	// Parse query parameters
