@@ -29,9 +29,17 @@ func Init() {
 		log.Fatalf("Failed to connect to database: %v", pingErr)
 	}
 
-	//Run migration
-	if migrateErr := runMigrations("migrations/001_init.sql"); migrateErr != nil {
-		log.Fatalf("Failed to run migrations: %v", migrateErr)
+	//Run migrations
+	migrations := []string{
+		"migrations/001_init.sql",
+		"migrations/002_add_user_status.sql",
+		"migrations/003_add_message_read_status.sql",
+	}
+
+	for _, migrationFile := range migrations {
+		if migrateErr := runMigrations(migrationFile); migrateErr != nil {
+			log.Fatalf("Failed to run migration %s: %v", migrationFile, migrateErr)
+		}
 	}
 
 	log.Println("Database initialized and migrations applied successfully.")
