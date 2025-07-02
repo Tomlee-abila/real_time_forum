@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/Tomlee-abila/real_time_forum/backend/internal/database"
 	"github.com/Tomlee-abila/real_time_forum/backend/internal/models"
@@ -45,6 +46,62 @@ func PostsHandler(w http.ResponseWriter, r *http.Request) {
 	default:
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
+}
+
+// GetPostsHandler handles GET /posts - retrieve posts feed
+func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
+	// Parse query parameters
+	limitStr := r.URL.Query().Get("limit")
+	offsetStr := r.URL.Query().Get("offset")
+	category := r.URL.Query().Get("category")
+
+	// Set default values
+	limit := 10
+	offset := 0
+
+	// Parse limit
+	if limitStr != "" {
+		if parsedLimit, err := strconv.Atoi(limitStr); err == nil && parsedLimit > 0 && parsedLimit <= 50 {
+			limit = parsedLimit
+		}
+	}
+
+	// Parse offset
+	if offsetStr != "" {
+		if parsedOffset, err := strconv.Atoi(offsetStr); err == nil && parsedOffset >= 0 {
+			offset = parsedOffset
+		}
+	}
+
+	var posts []models.Post
+	var err error
+
+	// Get posts by category or all posts
+	if category != "" {
+		posts, err = database.GetPostsByCategory(category, limit, offset)
+	} else {
+		posts, err = database.GetAllPosts(limit, offset)
+	}
+
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Failed to retrieve posts")
+		return
+	}
+
+	// Get total count for pagination
+	var totalCount int
+	if category != "" {
+		totalCount, _ = database.GetPostCountByCategory(category)
+	} else {
+		totalCount, _ = database.GetPostCount()
+	}
+
+	respondWithJSON(w, http.StatusOK, map[string]interface{}{
+		"posts":       posts,
+		"total_count": totalCount,
+		"limit":       limit,
+		"offset":      offset,
+	})
 }
 
 // RegisterHandler handles user registration
