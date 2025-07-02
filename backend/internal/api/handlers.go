@@ -197,6 +197,34 @@ func DeletePostHandler(w http.ResponseWriter, r *http.Request, postID string) {
 	})
 }
 
+// CategoriesHandler handles GET /categories - get available categories
+func CategoriesHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	categories := models.GetValidCategories()
+	respondWithJSON(w, http.StatusOK, map[string]interface{}{
+		"categories": categories,
+	})
+}
+
+// Helper function to get user ID from session
+func getUserIDFromSession(r *http.Request) (string, error) {
+	token, err := utils.GetSessionFromRequest(r)
+	if err != nil {
+		return "", err
+	}
+
+	session, err := utils.GetSessionByToken(token)
+	if err != nil {
+		return "", err
+	}
+
+	return session.UserID, nil
+}
+
 // GetPostsHandler handles GET /posts - retrieve posts feed
 func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 	// Parse query parameters
