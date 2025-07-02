@@ -335,3 +335,21 @@ func GetAllOnlineUsers() ([]models.UserStatus, error) {
 
 	return users, nil
 }
+
+// CleanupOfflineUsers marks users as offline if they haven't been active recently
+func CleanupOfflineUsers(timeoutMinutes int) error {
+	cutoffTime := time.Now().Add(-time.Duration(timeoutMinutes) * time.Minute)
+
+	query := `
+        UPDATE user_status 
+        SET is_online = false 
+        WHERE last_active < ? AND is_online = true
+    `
+
+	_, err := DB.Exec(query, cutoffTime)
+	if err != nil {
+		return fmt.Errorf("failed to cleanup offline users: %w", err)
+	}
+
+	return nil
+}
