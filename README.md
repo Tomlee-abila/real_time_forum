@@ -78,6 +78,7 @@ real_time_forum/
     - A single HTML page (index.html) serves as the SPA, with JavaScript dynamically rendering views (e.g., login, post feed, chat).
     - WebSocket client connects to the backend to send/receive real-time messages and user status updates.
     - JavaScript handles pagination for message history (loading 10 messages at a time) with throttling to optimize scrolling.
+    
 
 - **Real-Time Features:**
 
