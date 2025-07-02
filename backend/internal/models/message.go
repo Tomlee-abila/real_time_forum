@@ -56,3 +56,11 @@ type WebSocketMessage struct {
 	Data      interface{} `json:"data"`
 	Timestamp time.Time   `json:"timestamp"`
 }
+
+// MessageEvent represents different types of message events
+type MessageEvent struct {
+	Type       string      `json:"type"` // "new_message", "message_read", "user_online", "user_offline", "typing"
+	Message    *Message    `json:"message,omitempty"`
+	UserStatus *UserStatus `json:"user_status,omitempty"`
+	UserID     string      `json:"user_id,omitempty"`
+}
