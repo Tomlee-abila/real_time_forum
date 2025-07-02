@@ -1,6 +1,8 @@
 package websocket
 
 import (
+	"encoding/json"
+	"log"
 	"sync"
 	"time"
 
@@ -150,30 +152,81 @@ func (c *Client) WritePump() {
 
 // handleMessage processes incoming WebSocket messages
 func (c *Client) handleMessage(message []byte) {
-	// For now, just echo back - will implement proper message handling later
-	// var event Event
-	// if err := json.Unmarshal(message, &event); err != nil {
-	//     log.Printf("Error unmarshaling message: %v", err)
-	//     return
-	// }
+	// Parse the incoming message as an Event
+	var event Event
+	if err := json.Unmarshal(message, &event); err != nil {
+		log.Printf("Error unmarshaling message: %v", err)
+		c.sendError("Invalid message format", 400)
+		return
+	}
 
-	// Simple echo for testing
-	c.send <- message
+	// Process different event types
+	switch event.Type {
+	case EventNewMessage:
+		c.handleNewMessage(&event)
+	case EventMessageRead:
+		c.handleMessageRead(&event)
+	case EventTypingStart:
+		c.handleTypingStart(&event)
+	case EventTypingStop:
+		c.handleTypingStop(&event)
+	case EventPing:
+		c.sendPong()
+	default:
+		log.Printf("Unknown event type: %s", event.Type)
+		c.sendError("Unknown event type", 400)
+	}
 }
 
 // sendEvent sends an event to the client
 func (c *Client) sendEvent(event *Event) {
-	// data, err := json.Marshal(event)
-	// if err != nil {
-	//     log.Printf("Error marshaling event: %v", err)
-	//     return
-	// }
+	data, err := json.Marshal(event)
+	if err != nil {
+		log.Printf("Error marshaling event: %v", err)
+		return
+	}
 
-	// select {
-	// case c.send <- data:
-	// default:
-	//     close(c.send)
-	// }
+	select {
+	case c.send <- data:
+	default:
+		close(c.send)
+	}
+}
+
+// sendError sends an error event to the client
+func (c *Client) sendError(message string, code int) {
+	errorEvent := CreateErrorEvent(message, code)
+	c.sendEvent(errorEvent)
+}
+
+// sendPong sends a pong event to the client
+func (c *Client) sendPong() {
+	pongEvent := CreateEvent(EventPong, nil, c.userID)
+	c.sendEvent(pongEvent)
+}
+
+// handleNewMessage processes new message events (placeholder)
+func (c *Client) handleNewMessage(event *Event) {
+	// TODO: Implement message creation from WebSocket
+	log.Printf("New message event from user %s", c.userID)
+}
+
+// handleMessageRead processes message read events (placeholder)
+func (c *Client) handleMessageRead(event *Event) {
+	// TODO: Implement message read confirmation
+	log.Printf("Message read event from user %s", c.userID)
+}
+
+// handleTypingStart processes typing start events (placeholder)
+func (c *Client) handleTypingStart(event *Event) {
+	// TODO: Implement typing indicator broadcast
+	log.Printf("Typing start event from user %s", c.userID)
+}
+
+// handleTypingStop processes typing stop events (placeholder)
+func (c *Client) handleTypingStop(event *Event) {
+	// TODO: Implement typing indicator stop broadcast
+	log.Printf("Typing stop event from user %s", c.userID)
 }
 
 // Close closes the client connection
