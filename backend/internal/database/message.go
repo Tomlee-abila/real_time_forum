@@ -220,3 +220,20 @@ func MarkMessagesAsRead(receiverID, senderID string) error {
 
 	return nil
 }
+
+// GetUnreadMessageCount gets the count of unread messages from a specific user
+func GetUnreadMessageCount(receiverID, senderID string) (int, error) {
+	query := `
+        SELECT COUNT(*) 
+        FROM messages 
+        WHERE receiver_id = ? AND sender_id = ? AND is_read = false
+    `
+
+	var count int
+	err := DB.QueryRow(query, receiverID, senderID).Scan(&count)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get unread message count: %w", err)
+	}
+
+	return count, nil
+}
