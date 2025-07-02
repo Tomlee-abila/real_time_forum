@@ -22,3 +22,23 @@ const (
 	EventPing         EventType = "ping"
 	EventPong         EventType = "pong"
 )
+
+// Event represents a WebSocket event
+type Event struct {
+	Type      EventType   `json:"type"`
+	Data      interface{} `json:"data"`
+	Timestamp string      `json:"timestamp"`
+	UserID    string      `json:"user_id,omitempty"`
+}
+
+// MessageEvent represents a new message event
+type MessageEvent struct {
+	Message interface{} `json:"message"`
+}
+
+// TypingEvent represents typing start/stop events
+type TypingEvent struct {
+	UserID       string `json:"user_id"`
+	UserNickname string `json:"user_nickname"`
+	ReceiverID   string `json:"receiver_id"`
+}
