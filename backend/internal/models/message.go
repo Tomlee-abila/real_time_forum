@@ -16,3 +16,9 @@ type Message struct {
 	SenderNickname   string `json:"sender_nickname,omitempty"`
 	ReceiverNickname string `json:"receiver_nickname,omitempty"`
 }
+
+// MessageCreation represents the data needed to create a message
+type MessageCreation struct {
+	ReceiverID string `json:"receiver_id"`
+	Content    string `json:"content"`
+}
