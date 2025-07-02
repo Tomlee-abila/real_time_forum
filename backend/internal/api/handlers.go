@@ -23,11 +23,16 @@ func RegisterRoutes(mux *http.ServeMux) {
 	// serve js
 	mux.Handle("/js/", http.StripPrefix("/js/", http.FileServer(http.Dir("frontend/static/js"))))
 
-	// API endpoints
+	// Authentication endpoints
 	mux.HandleFunc("/register", RegisterHandler)
 	mux.HandleFunc("/login", LoginHandler)
 	mux.HandleFunc("/logout", LogoutHandler)
 	mux.HandleFunc("/me", GetCurrentUserHandler)
+
+	// Post endpoints
+	mux.HandleFunc("/posts", PostsHandler)
+	mux.HandleFunc("/posts/", PostDetailHandler) // For /posts/{id} and /posts/{id}/comments
+	mux.HandleFunc("/categories", CategoriesHandler)
 }
 
 // RegisterHandler handles user registration
