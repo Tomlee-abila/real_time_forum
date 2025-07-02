@@ -1,6 +1,7 @@
 package database
 
 import (
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -106,4 +107,70 @@ func GetMessageHistory(userID1, userID2 string, limit, offset int) (*models.Mess
 		TotalCount:  totalCount,
 		CurrentPage: (offset / limit) + 1,
 	}, nil
+}
+
+// GetConversations retrieves all conversations for a user
+func GetConversations(userID string) ([]models.Conversation, error) {
+	query := `
+        SELECT DISTINCT
+            CASE 
+                WHEN m.sender_id = ? THEN m.receiver_id 
+                ELSE m.sender_id 
+            END as other_user_id,
+            u.nickname as other_user_nickname,
+            us.is_online,
+            us.last_seen
+        FROM messages m
+        LEFT JOIN users u ON (
+            CASE 
+                WHEN m.sender_id = ? THEN m.receiver_id = u.id
+                ELSE m.sender_id = u.id
+            END
+        )
+        LEFT JOIN user_status us ON u.id = us.user_id
+        WHERE m.sender_id = ? OR m.receiver_id = ?
+        ORDER BY (
+            SELECT MAX(created_at) 
+            FROM messages m2 
+            WHERE (m2.sender_id = ? AND m2.receiver_id = other_user_id) 
+               OR (m2.sender_id = other_user_id AND m2.receiver_id = ?)
+        ) DESC
+    `
+
+	rows, err := DB.Query(query, userID, userID, userID, userID, userID, userID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get conversations: %w", err)
+	}
+	defer rows.Close()
+
+	var conversations []models.Conversation
+	for rows.Next() {
+		var conv models.Conversation
+		var lastSeen sql.NullTime
+
+		err := rows.Scan(&conv.UserID, &conv.UserNickname, &conv.IsOnline, &lastSeen)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan conversation: %w", err)
+		}
+
+		if lastSeen.Valid {
+			conv.LastSeen = lastSeen.Time
+		}
+
+		// Get last message
+		lastMessage, err := GetLastMessage(userID, conv.UserID)
+		if err == nil {
+			conv.LastMessage = lastMessage
+		}
+
+		// Get unread count
+		unreadCount, err := GetUnreadMessageCount(userID, conv.UserID)
+		if err == nil {
+			conv.UnreadCount = unreadCount
+		}
+
+		conversations = append(conversations, conv)
+	}
+
+	return conversations, nil
 }
