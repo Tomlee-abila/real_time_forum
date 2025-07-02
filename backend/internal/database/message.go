@@ -306,3 +306,32 @@ func GetUserStatus(userID string) (*models.UserStatus, error) {
 
 	return &status, nil
 }
+
+// GetAllOnlineUsers gets all currently online users
+func GetAllOnlineUsers() ([]models.UserStatus, error) {
+	query := `
+        SELECT us.user_id, u.nickname, us.is_online, us.last_seen, us.last_active
+        FROM user_status us
+        LEFT JOIN users u ON us.user_id = u.id
+        WHERE us.is_online = true
+        ORDER BY u.nickname ASC
+    `
+
+	rows, err := DB.Query(query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get online users: %w", err)
+	}
+	defer rows.Close()
+
+	var users []models.UserStatus
+	for rows.Next() {
+		var user models.UserStatus
+		err := rows.Scan(&user.UserID, &user.Nickname, &user.IsOnline, &user.LastSeen, &user.LastActive)
+		if err != nil {
+			return nil, fmt.Errorf("failed to scan user status: %w", err)
+		}
+		users = append(users, user)
+	}
+
+	return users, nil
+}
