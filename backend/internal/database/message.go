@@ -237,3 +237,37 @@ func GetUnreadMessageCount(receiverID, senderID string) (int, error) {
 
 	return count, nil
 }
+
+// GetMessageCount gets the total count of messages between two users
+func GetMessageCount(userID1, userID2 string) (int, error) {
+	query := `
+        SELECT COUNT(*) 
+        FROM messages 
+        WHERE (sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?)
+    `
+
+	var count int
+	err := DB.QueryRow(query, userID1, userID2, userID2, userID1).Scan(&count)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get message count: %w", err)
+	}
+
+	return count, nil
+}
+
+// UpdateUserStatus updates or creates user online status
+func UpdateUserStatus(userID string, isOnline bool) error {
+	now := time.Now()
+
+	query := `
+        INSERT OR REPLACE INTO user_status (user_id, is_online, last_seen, last_active)
+        VALUES (?, ?, ?, ?)
+    `
+
+	_, err := DB.Exec(query, userID, isOnline, now, now)
+	if err != nil {
+		return fmt.Errorf("failed to update user status: %w", err)
+	}
+
+	return nil
+}
