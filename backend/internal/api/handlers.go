@@ -117,6 +117,59 @@ func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// GetPostDetailHandler handles GET /posts/{id} - get post with comments
+func GetPostDetailHandler(w http.ResponseWriter, r *http.Request, postID string) {
+	postWithComments, err := database.GetPostWithComments(postID)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			respondWithError(w, http.StatusNotFound, "Post not found")
+		} else {
+			respondWithError(w, http.StatusInternalServerError, "Failed to retrieve post")
+		}
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, postWithComments)
+}
+
+// CreateCommentHandler handles POST /posts/{id}/comments - create comment
+func CreateCommentHandler(w http.ResponseWriter, r *http.Request, postID string) {
+	// Get user from session
+	userID, err := getUserIDFromSession(r)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Authentication required")
+		return
+	}
+
+	var commentData models.CommentCreation
+	if err := json.NewDecoder(r.Body).Decode(&commentData); err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid JSON format")
+		return
+	}
+
+	// Validate input
+	if err := commentData.Validate(); err != nil {
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// Create comment
+	comment, err := database.CreateComment(userID, postID, &commentData)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			respondWithError(w, http.StatusNotFound, "Post not found")
+		} else {
+			respondWithError(w, http.StatusInternalServerError, "Failed to create comment")
+		}
+		return
+	}
+
+	respondWithJSON(w, http.StatusCreated, map[string]interface{}{
+		"message": "Comment created successfully",
+		"comment": comment,
+	})
+}
+
 // GetPostsHandler handles GET /posts - retrieve posts feed
 func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 	// Parse query parameters
