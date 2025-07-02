@@ -170,6 +170,33 @@ func CreateCommentHandler(w http.ResponseWriter, r *http.Request, postID string)
 	})
 }
 
+// DeletePostHandler handles DELETE /posts/{id} - delete post
+func DeletePostHandler(w http.ResponseWriter, r *http.Request, postID string) {
+	// Get user from session
+	userID, err := getUserIDFromSession(r)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Authentication required")
+		return
+	}
+
+	// Delete post
+	err = database.DeletePost(postID, userID)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			respondWithError(w, http.StatusNotFound, "Post not found")
+		} else if strings.Contains(err.Error(), "unauthorized") {
+			respondWithError(w, http.StatusForbidden, err.Error())
+		} else {
+			respondWithError(w, http.StatusInternalServerError, "Failed to delete post")
+		}
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, map[string]string{
+		"message": "Post deleted successfully",
+	})
+}
+
 // GetPostsHandler handles GET /posts - retrieve posts feed
 func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
 	// Parse query parameters
