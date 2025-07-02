@@ -84,3 +84,34 @@ func (mc *MessageCreation) Validate() error {
 
 	return nil
 }
+
+// GetMessageEventTypes returns valid message event types
+func GetMessageEventTypes() []string {
+	return []string{
+		"new_message",
+		"message_read",
+		"user_online",
+		"user_offline",
+		"typing_start",
+		"typing_stop",
+	}
+}
+
+// CreateWebSocketMessage creates a formatted WebSocket message
+func CreateWebSocketMessage(msgType string, data interface{}) *WebSocketMessage {
+	return &WebSocketMessage{
+		Type:      msgType,
+		Data:      data,
+		Timestamp: time.Now(),
+	}
+}
+
+// CreateMessageEvent creates a message event
+func CreateMessageEvent(eventType string, message *Message, userStatus *UserStatus, userID string) *MessageEvent {
+	return &MessageEvent{
+		Type:       eventType,
+		Message:    message,
+		UserStatus: userStatus,
+		UserID:     userID,
+	}
+}
