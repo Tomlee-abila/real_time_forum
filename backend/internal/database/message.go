@@ -204,3 +204,19 @@ func GetLastMessage(userID1, userID2 string) (*models.Message, error) {
 
 	return &message, nil
 }
+
+// MarkMessagesAsRead marks all messages from a specific user as read
+func MarkMessagesAsRead(receiverID, senderID string) error {
+	query := `
+        UPDATE messages 
+        SET is_read = true 
+        WHERE receiver_id = ? AND sender_id = ? AND is_read = false
+    `
+
+	_, err := DB.Exec(query, receiverID, senderID)
+	if err != nil {
+		return fmt.Errorf("failed to mark messages as read: %w", err)
+	}
+
+	return nil
+}
