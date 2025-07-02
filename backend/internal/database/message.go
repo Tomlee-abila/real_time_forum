@@ -174,3 +174,33 @@ func GetConversations(userID string) ([]models.Conversation, error) {
 
 	return conversations, nil
 }
+
+// GetLastMessage gets the last message between two users
+func GetLastMessage(userID1, userID2 string) (*models.Message, error) {
+	query := `
+        SELECT 
+            m.id, m.sender_id, m.receiver_id, m.content, m.created_at, m.is_read,
+            s.nickname as sender_nickname, r.nickname as receiver_nickname
+        FROM messages m
+        LEFT JOIN users s ON m.sender_id = s.id
+        LEFT JOIN users r ON m.receiver_id = r.id
+        WHERE (m.sender_id = ? AND m.receiver_id = ?) OR (m.sender_id = ? AND m.receiver_id = ?)
+        ORDER BY m.created_at DESC
+        LIMIT 1
+    `
+
+	var message models.Message
+	err := DB.QueryRow(query, userID1, userID2, userID2, userID1).Scan(
+		&message.ID, &message.SenderID, &message.ReceiverID, &message.Content,
+		&message.CreatedAt, &message.IsRead, &message.SenderNickname, &message.ReceiverNickname,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, fmt.Errorf("no messages found")
+		}
+		return nil, fmt.Errorf("failed to get last message: %w", err)
+	}
+
+	return &message, nil
+}
