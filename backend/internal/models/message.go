@@ -49,3 +49,10 @@ type UserStatus struct {
 	LastSeen   time.Time `json:"last_seen"`
 	LastActive time.Time `json:"last_active"`
 }
+
+// WebSocketMessage represents a real-time message event
+type WebSocketMessage struct {
+	Type      string      `json:"type"`
+	Data      interface{} `json:"data"`
+	Timestamp time.Time   `json:"timestamp"`
+}
