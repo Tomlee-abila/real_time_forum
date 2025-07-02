@@ -22,3 +22,13 @@ type MessageCreation struct {
 	ReceiverID string `json:"receiver_id"`
 	Content    string `json:"content"`
 }
+
+// Conversation represents a conversation between two users
+type Conversation struct {
+	UserID       string    `json:"user_id"`
+	UserNickname string    `json:"user_nickname"`
+	LastMessage  *Message  `json:"last_message"`
+	UnreadCount  int       `json:"unread_count"`
+	IsOnline     bool      `json:"is_online"`
+	LastSeen     time.Time `json:"last_seen,omitempty"`
+}
