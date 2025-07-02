@@ -271,3 +271,38 @@ func UpdateUserStatus(userID string, isOnline bool) error {
 
 	return nil
 }
+
+// GetUserStatus gets the online status of a user
+func GetUserStatus(userID string) (*models.UserStatus, error) {
+	query := `
+        SELECT us.user_id, u.nickname, us.is_online, us.last_seen, us.last_active
+        FROM user_status us
+        LEFT JOIN users u ON us.user_id = u.id
+        WHERE us.user_id = ?
+    `
+
+	var status models.UserStatus
+	err := DB.QueryRow(query, userID).Scan(
+		&status.UserID, &status.Nickname, &status.IsOnline, &status.LastSeen, &status.LastActive,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// User status doesn't exist, create default
+			user, err := GetUserByID(userID)
+			if err != nil {
+				return nil, fmt.Errorf("user not found")
+			}
+			return &models.UserStatus{
+				UserID:     userID,
+				Nickname:   user.Nickname,
+				IsOnline:   false,
+				LastSeen:   time.Now(),
+				LastActive: time.Now(),
+			}, nil
+		}
+		return nil, fmt.Errorf("failed to get user status: %w", err)
+	}
+
+	return &status, nil
+}
