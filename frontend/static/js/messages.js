@@ -155,6 +155,7 @@ class MessagingManager {
             this.onlineUsers.add(user.user_id);
             this.updateOnlineUsersList();
             this.updateUserStatusInConversations(user.user_id, true);
+            this.updateOnlineUserCount();
         }
     }
 
@@ -166,6 +167,7 @@ class MessagingManager {
             this.onlineUsers.delete(user.user_id);
             this.updateOnlineUsersList();
             this.updateUserStatusInConversations(user.user_id, false);
+            this.updateOnlineUserCount();
         }
     }
 
@@ -759,6 +761,16 @@ class MessagingManager {
         if (conversation) {
             conversation.unread_count = 0;
             this.updateConversationsList();
+        }
+    }
+
+    // Update online user count in statistics
+    updateOnlineUserCount() {
+        const onlineUsersElement = document.getElementById('online-users');
+        if (onlineUsersElement) {
+            const count = this.onlineUsers.size;
+            onlineUsersElement.textContent = count;
+            onlineUsersElement.classList.remove('loading');
         }
     }
 }

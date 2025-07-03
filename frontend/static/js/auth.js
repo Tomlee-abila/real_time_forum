@@ -83,6 +83,7 @@ class AuthManager {
                 window.currentUserId = result.user.id; // Set for messaging system
                 this.showView('home');
                 this.updateUserInfo(result.user);
+                this.loadUserStats(); // Load user statistics
                 form.reset();
             } else {
                 // Login failed
@@ -223,6 +224,90 @@ class AuthManager {
             userDetails.innerHTML = '';
         }
         window.currentUserId = null; // Clear for messaging system
+        this.clearUserStats(); // Clear user statistics
+    }
+
+    // Load user statistics from API
+    async loadUserStats() {
+        try {
+            const response = await fetch('/api/users/stats');
+            if (response.ok) {
+                const data = await response.json();
+                this.updateUserStats(data);
+            } else {
+                console.error('Failed to load user statistics');
+                this.showUserStatsError();
+            }
+        } catch (error) {
+            console.error('Error loading user statistics:', error);
+            this.showUserStatsError();
+        }
+    }
+
+    // Update user statistics display
+    updateUserStats(stats) {
+        const totalUsers = document.getElementById('total-users');
+        const onlineUsers = document.getElementById('online-users');
+        const offlineUsers = document.getElementById('offline-users');
+
+        if (totalUsers) {
+            totalUsers.textContent = stats.total_users || 0;
+            totalUsers.classList.remove('loading');
+        }
+
+        if (onlineUsers) {
+            onlineUsers.textContent = stats.online_users || 0;
+            onlineUsers.classList.remove('loading');
+        }
+
+        if (offlineUsers) {
+            offlineUsers.textContent = stats.offline_users || 0;
+            offlineUsers.classList.remove('loading');
+        }
+    }
+
+    // Clear user statistics
+    clearUserStats() {
+        const totalUsers = document.getElementById('total-users');
+        const onlineUsers = document.getElementById('online-users');
+        const offlineUsers = document.getElementById('offline-users');
+
+        if (totalUsers) {
+            totalUsers.textContent = 'Loading...';
+            totalUsers.classList.add('loading');
+        }
+
+        if (onlineUsers) {
+            onlineUsers.textContent = 'Loading...';
+            onlineUsers.classList.add('loading');
+        }
+
+        if (offlineUsers) {
+            offlineUsers.textContent = 'Loading...';
+            offlineUsers.classList.add('loading');
+        }
+    }
+
+    // Show error state for user statistics
+    showUserStatsError() {
+        const totalUsers = document.getElementById('total-users');
+        const onlineUsers = document.getElementById('online-users');
+        const offlineUsers = document.getElementById('offline-users');
+
+        if (totalUsers) {
+            totalUsers.textContent = 'Error';
+            totalUsers.classList.remove('loading');
+        }
+
+        if (onlineUsers) {
+            onlineUsers.textContent = 'Error';
+            onlineUsers.classList.remove('loading');
+        }
+
+        if (offlineUsers) {
+            offlineUsers.textContent = 'Error';
+            offlineUsers.classList.remove('loading');
+        }
     }
 }
 
