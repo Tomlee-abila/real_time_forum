@@ -48,6 +48,7 @@ func RegisterRoutes(mux *http.ServeMux, hub *websocket.Hub) {
 	mux.HandleFunc("/api/messages", MessagesHandler)                   // GET all messages, POST new message
 	mux.HandleFunc("/api/messages/read/", MarkMessagesReadHandler)     // PUT /api/messages/read/{userID}
 	mux.HandleFunc("/api/users/online", GetOnlineUsersHandler)
+	mux.HandleFunc("/api/users/stats", GetUserStatsHandler)
 }
 
 // PostsHandler handles GET /posts (get all posts) and POST /posts (create post)
@@ -675,14 +676,50 @@ func GetOnlineUsersHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get online users from database
-	onlineUsers, err := database.GetAllOnlineUsers()
+	// Get online users from WebSocket hub (real-time data)
+	if wsHub == nil {
+		respondWithError(w, http.StatusInternalServerError, "WebSocket hub not available")
+		return
+	}
+
+	onlineUsers := wsHub.GetOnlineUserDetails()
+
+	respondWithJSON(w, http.StatusOK, map[string]interface{}{
+		"users": onlineUsers,
+		"count": len(onlineUsers),
+	})
+}
+
+// GetUserStatsHandler handles GET /api/users/stats
+func GetUserStatsHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Authenticate user
+	_, err := getUserIDFromSession(r)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Failed to get online users")
+		respondWithError(w, http.StatusUnauthorized, "Authentication required")
+		return
+	}
+
+	// Get online user count from WebSocket hub
+	onlineCount := 0
+	if wsHub != nil {
+		onlineCount = wsHub.GetOnlineUserCount()
+	}
+
+	// Get total registered users from database
+	totalUsers, err := database.GetTotalUserCount()
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Failed to get user statistics")
 		return
 	}
 
 	respondWithJSON(w, http.StatusOK, map[string]interface{}{
-		"users": onlineUsers,
+		"total_users":   totalUsers,
+		"online_users":  onlineCount,
+		"offline_users": totalUsers - onlineCount,
 	})
 }
