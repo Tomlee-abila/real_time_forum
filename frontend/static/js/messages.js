@@ -156,6 +156,7 @@ class MessagingManager {
             this.updateOnlineUsersList();
             this.updateUserStatusInConversations(user.user_id, true);
             this.updateOnlineUserCount();
+            this.refreshOnlineUsersDisplay();
         }
     }
 
@@ -168,6 +169,7 @@ class MessagingManager {
             this.updateOnlineUsersList();
             this.updateUserStatusInConversations(user.user_id, false);
             this.updateOnlineUserCount();
+            this.refreshOnlineUsersDisplay();
         }
     }
 
@@ -767,10 +769,24 @@ class MessagingManager {
     // Update online user count in statistics
     updateOnlineUserCount() {
         const onlineUsersElement = document.getElementById('online-users');
+        const onlineCountElement = document.getElementById('online-count');
+
         if (onlineUsersElement) {
             const count = this.onlineUsers.size;
             onlineUsersElement.textContent = count;
             onlineUsersElement.classList.remove('loading');
+        }
+
+        if (onlineCountElement) {
+            const count = this.onlineUsers.size;
+            onlineCountElement.textContent = count;
+        }
+    }
+
+    // Refresh online users display by calling the auth manager
+    refreshOnlineUsersDisplay() {
+        if (window.authManager && typeof window.authManager.loadOnlineUsers === 'function') {
+            window.authManager.loadOnlineUsers();
         }
     }
 }

@@ -84,6 +84,7 @@ class AuthManager {
                 this.showView('home');
                 this.updateUserInfo(result.user);
                 this.loadUserStats(); // Load user statistics
+                this.loadOnlineUsers(); // Load online users list
                 form.reset();
             } else {
                 // Login failed
@@ -225,6 +226,7 @@ class AuthManager {
         }
         window.currentUserId = null; // Clear for messaging system
         this.clearUserStats(); // Clear user statistics
+        this.clearOnlineUsers(); // Clear online users list
     }
 
     // Load user statistics from API
@@ -248,6 +250,7 @@ class AuthManager {
     updateUserStats(stats) {
         const totalUsers = document.getElementById('total-users');
         const onlineUsers = document.getElementById('online-users');
+        const onlineCount = document.getElementById('online-count');
         const offlineUsers = document.getElementById('offline-users');
 
         if (totalUsers) {
@@ -258,6 +261,10 @@ class AuthManager {
         if (onlineUsers) {
             onlineUsers.textContent = stats.online_users || 0;
             onlineUsers.classList.remove('loading');
+        }
+
+        if (onlineCount) {
+            onlineCount.textContent = stats.online_users || 0;
         }
 
         if (offlineUsers) {
@@ -307,6 +314,88 @@ class AuthManager {
         if (offlineUsers) {
             offlineUsers.textContent = 'Error';
             offlineUsers.classList.remove('loading');
+        }
+    }
+
+    // Load online users from API
+    async loadOnlineUsers() {
+        try {
+            const response = await fetch('/api/users/online');
+            if (response.ok) {
+                const data = await response.json();
+                this.updateOnlineUsersDisplay(data.users || [], data.count || 0);
+            } else {
+                console.error('Failed to load online users');
+                this.showOnlineUsersError();
+            }
+        } catch (error) {
+            console.error('Error loading online users:', error);
+            this.showOnlineUsersError();
+        }
+    }
+
+    // Update online users display
+    updateOnlineUsersDisplay(users, count) {
+        const onlineUsersDisplay = document.getElementById('online-users-display');
+        const onlineCount = document.getElementById('online-count');
+        const onlineUsersCount = document.getElementById('online-users');
+
+        // Update counts
+        if (onlineCount) {
+            onlineCount.textContent = count;
+        }
+        if (onlineUsersCount) {
+            onlineUsersCount.textContent = count;
+            onlineUsersCount.classList.remove('loading');
+        }
+
+        if (!onlineUsersDisplay) return;
+
+        // Clear loading message
+        onlineUsersDisplay.innerHTML = '';
+
+        if (users.length === 0) {
+            onlineUsersDisplay.innerHTML = '<div class="no-users-message">No users currently online</div>';
+            return;
+        }
+
+        // Create user tags
+        users.forEach(user => {
+            const userTag = document.createElement('span');
+            userTag.className = 'online-user-tag';
+
+            // Highlight current user
+            if (user.user_id === window.currentUserId) {
+                userTag.classList.add('current-user');
+                userTag.textContent = `${user.nickname} (You)`;
+            } else {
+                userTag.textContent = user.nickname;
+            }
+
+            onlineUsersDisplay.appendChild(userTag);
+        });
+    }
+
+    // Clear online users display
+    clearOnlineUsers() {
+        const onlineUsersDisplay = document.getElementById('online-users-display');
+        const onlineCount = document.getElementById('online-count');
+
+        if (onlineUsersDisplay) {
+            onlineUsersDisplay.innerHTML = '<div class="loading-message">Loading online users...</div>';
+        }
+
+        if (onlineCount) {
+            onlineCount.textContent = '0';
+        }
+    }
+
+    // Show error state for online users
+    showOnlineUsersError() {
+        const onlineUsersDisplay = document.getElementById('online-users-display');
+
+        if (onlineUsersDisplay) {
+            onlineUsersDisplay.innerHTML = '<div class="no-users-message">Error loading online users</div>';
         }
     }
 }
