@@ -80,6 +80,7 @@ class AuthManager {
             if (response.ok) {
                 // Login successful
                 this.currentUser = result.user;
+                window.currentUserId = result.user.id; // Set for messaging system
                 this.showView('home');
                 this.updateUserInfo(result.user);
                 form.reset();
@@ -221,6 +222,7 @@ class AuthManager {
         if (userDetails) {
             userDetails.innerHTML = '';
         }
+        window.currentUserId = null; // Clear for messaging system
     }
 }
 
