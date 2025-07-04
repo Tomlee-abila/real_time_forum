@@ -166,6 +166,17 @@ func CheckNicknameExists(nickname string) (bool, error) {
 	return count > 0, nil
 }
 
+// GetTotalUserCount returns the total number of registered users
+func GetTotalUserCount() (int, error) {
+	query := "SELECT COUNT(*) FROM users"
+	var count int
+	err := DB.QueryRow(query).Scan(&count)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get total user count: %w", err)
+	}
+	return count, nil
+}
+
 // Helper function to validate email format
 func isValidEmail(email string) bool {
 	// Simple email validation - you can use the same regex from models

@@ -158,3 +158,38 @@ func (h *Hub) BroadcastMessageFromAPI(event *Event, targetUserID string) {
 		log.Printf("Hub broadcast channel full, message dropped")
 	}
 }
+
+// GetOnlineUserCount returns the number of currently connected users
+func (h *Hub) GetOnlineUserCount() int {
+	h.mutex.RLock()
+	defer h.mutex.RUnlock()
+	return len(h.userClients)
+}
+
+// GetOnlineUsers returns a list of currently connected user IDs
+func (h *Hub) GetOnlineUsers() []string {
+	h.mutex.RLock()
+	defer h.mutex.RUnlock()
+
+	users := make([]string, 0, len(h.userClients))
+	for userID := range h.userClients {
+		users = append(users, userID)
+	}
+	return users
+}
+
+// GetOnlineUserDetails returns detailed information about online users
+func (h *Hub) GetOnlineUserDetails() []map[string]interface{} {
+	h.mutex.RLock()
+	defer h.mutex.RUnlock()
+
+	users := make([]map[string]interface{}, 0, len(h.userClients))
+	for userID, client := range h.userClients {
+		users = append(users, map[string]interface{}{
+			"user_id":   userID,
+			"nickname":  client.nickname,
+			"connected": true,
+		})
+	}
+	return users
+}

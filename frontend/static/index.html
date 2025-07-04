@@ -100,6 +100,108 @@
                         <h3>User Information</h3>
                         <div id="user-details"></div>
                     </div>
+
+                    <!-- User Statistics -->
+                    <div class="user-stats">
+                        <h3>Forum Statistics</h3>
+                        <div class="stats-container">
+                            <div class="stat-item">
+                                <span class="stat-label">Total Users:</span>
+                                <span id="total-users" class="stat-value">Loading...</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Online Now:</span>
+                                <span id="online-users" class="stat-value online">Loading...</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">Offline:</span>
+                                <span id="offline-users" class="stat-value">Loading...</span>
+                            </div>
+                        </div>
+
+                        <!-- Online Users List -->
+                        <div class="online-users-section">
+                            <h4>Online Users (<span id="online-count">0</span>)</h4>
+                            <div id="online-users-display" class="online-users-display">
+                                <div class="loading-message">Loading online users...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Tabs -->
+                    <div class="tab-navigation">
+                        <button id="posts-tab" class="tab-btn active">Posts</button>
+                        <button id="messages-tab" class="tab-btn">Messages</button>
+                    </div>
+
+                    <!-- Posts Section -->
+                    <div id="posts-section" class="content-section">
+                        <h3>Forum Posts</h3>
+                        <p>Posts functionality will be here</p>
+                    </div>
+
+                    <!-- Messages Section -->
+                    <div id="messages-section" class="content-section hidden">
+                        <div class="messaging-container">
+                            <!-- Connection Status -->
+                            <div class="connection-status">
+                                <span id="connection-status" class="status-disconnected">Disconnected</span>
+                            </div>
+
+                            <!-- Messaging Layout -->
+                            <div class="messaging-layout">
+                                <!-- Sidebar with conversations and online users -->
+                                <div class="messaging-sidebar">
+                                    <!-- Conversations List -->
+                                    <div class="conversations-panel">
+                                        <h4>Conversations</h4>
+                                        <div id="conversation-list" class="conversation-list">
+                                            <!-- Conversations will be populated here -->
+                                        </div>
+                                    </div>
+
+                                    <!-- Online Users List -->
+                                    <div class="online-users-panel">
+                                        <h4>Online Users</h4>
+                                        <div id="online-users-list" class="online-users-list">
+                                            <!-- Online users will be populated here -->
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Main Chat Area -->
+                                <div class="chat-area">
+                                    <!-- Chat Header -->
+                                    <div id="chat-header" class="chat-header hidden">
+                                        <h4 id="chat-user-name">Select a conversation</h4>
+                                        <div id="chat-user-status" class="user-status"></div>
+                                    </div>
+
+                                    <!-- Messages Container -->
+                                    <div id="message-container" class="message-container">
+                                        <div class="no-conversation">
+                                            <p>Select a conversation to start messaging</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Typing Indicator -->
+                                    <div id="typing-indicator" class="typing-indicator hidden">
+                                        <span id="typing-user"></span> is typing...
+                                    </div>
+
+                                    <!-- Message Input -->
+                                    <div id="message-input-area" class="message-input-area hidden">
+                                        <form id="message-form" class="message-form">
+                                            <input type="text" id="message-input" class="message-input"
+                                                   placeholder="Type your message..." maxlength="1000">
+                                            <button type="submit" class="send-btn">Send</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <button id="logout-btn" class="btn btn-secondary">Logout</button>
                 </div>
             </div>
@@ -108,6 +210,8 @@
 
     <!-- JavaScript Files -->
     <script src="/js/auth.js"></script>
+    <script src="/js/websocket.js"></script>
+    <script src="/js/messages.js"></script>
     <script src="/js/main.js"></script>
 </body>
 </html>
