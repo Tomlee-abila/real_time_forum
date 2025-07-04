@@ -5,19 +5,19 @@ import (
 	"fmt"
 	"log"
 	"os"
+
 	_ "github.com/mattn/go-sqlite3"
 )
 
 var DB *sql.DB
 
+func Init() {
+	var openErr error
 
-func Init(){
-	var err error
+	DB, openErr = sql.Open("sqlite3", "forum.db")
 
-	DB, err = sql.Open("sqlite3", "forum.db")
-
-	if err != nil{
-		log.Fatalf("Failed to open database: %v", err)
+	if openErr != nil {
+		log.Fatalf("Failed to open database: %v", openErr)
 	}
 
 	DB.SetMaxOpenConns(10) //allow up to 10 concurrent connections
@@ -25,28 +25,28 @@ func Init(){
 	DB.SetConnMaxLifetime(0)
 
 	//Test the connection
-	if err := DB.Ping(); err != nil{
-		log.Fatalf("Failed to connect to database: %v", err)
+	if pingErr := DB.Ping(); pingErr != nil {
+		log.Fatalf("Failed to connect to database: %v", pingErr)
 	}
 
 	//Run migration
-	if err := runMigrations("migrations/001_init.sql"); err != nil {
-		log.Fatalf("Failed to run migrations: %v", err)
+	if migrateErr := runMigrations("migrations/001_init.sql"); migrateErr != nil {
+		log.Fatalf("Failed to run migrations: %v", migrateErr)
 	}
 
 	log.Println("Database initialized and migrations applied successfully.")
 }
 
-func runMigrations(filepath string) error{
+func runMigrations(filepath string) error {
 
-	content, err := os.ReadFile(filepath)
-	if err != nil{
-		return fmt.Errorf("failed to read migration file: %w", err)
+	content, readErr := os.ReadFile(filepath)
+	if readErr != nil {
+		return fmt.Errorf("failed to read migration file: %w", readErr)
 	}
 
-	_, err = DB.Exec(string(content))
-	if err != nil{
-		return fmt.Errorf("migration execution failed: %w", err)
+	_, execErr := DB.Exec(string(content))
+	if execErr != nil {
+		return fmt.Errorf("migration execution failed: %w", execErr)
 	}
 	return nil
 }
