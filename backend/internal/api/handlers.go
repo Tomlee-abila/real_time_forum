@@ -10,10 +10,16 @@ import (
 	"github.com/Tomlee-abila/real_time_forum/backend/internal/database"
 	"github.com/Tomlee-abila/real_time_forum/backend/internal/models"
 	"github.com/Tomlee-abila/real_time_forum/backend/internal/utils"
+	"github.com/Tomlee-abila/real_time_forum/backend/internal/websocket"
 )
 
+// Global WebSocket hub reference
+var wsHub *websocket.Hub
+
 // RegisterRoutes adds all HTTP routes to the mux
-func RegisterRoutes(mux *http.ServeMux) {
+func RegisterRoutes(mux *http.ServeMux, hub *websocket.Hub) {
+	// Store hub reference for use in handlers
+	wsHub = hub
 	// Serve the Single page front-end
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "frontend/static/index.html")
@@ -35,6 +41,13 @@ func RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/posts", PostsHandler)
 	mux.HandleFunc("/posts/", PostDetailHandler) // For /posts/{id} and /posts/{id}/comments
 	mux.HandleFunc("/categories", CategoriesHandler)
+
+	// Message endpoints
+	mux.HandleFunc("/api/messages/conversations", GetConversationsHandler)
+	mux.HandleFunc("/api/messages/history/", GetMessageHistoryHandler) // For /api/messages/history/{userID}
+	mux.HandleFunc("/api/messages", MessagesHandler)                   // GET all messages, POST new message
+	mux.HandleFunc("/api/messages/read/", MarkMessagesReadHandler)     // PUT /api/messages/read/{userID}
+	mux.HandleFunc("/api/users/online", GetOnlineUsersHandler)
 }
 
 // PostsHandler handles GET /posts (get all posts) and POST /posts (create post)
@@ -481,4 +494,195 @@ func RequireAuth(next http.HandlerFunc) http.HandlerFunc {
 		r.Header.Set("X-User-ID", session.UserID)
 		next(w, r)
 	}
+}
+
+// GetConversationsHandler handles GET /api/messages/conversations
+func GetConversationsHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Get user from session
+	userID, err := getUserIDFromSession(r)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Authentication required")
+		return
+	}
+
+	// Get conversations from database
+	conversations, err := database.GetConversations(userID)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Failed to get conversations")
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, map[string]interface{}{
+		"conversations": conversations,
+	})
+}
+
+// GetMessageHistoryHandler handles GET /api/messages/history/{userID}
+func GetMessageHistoryHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Get user from session
+	currentUserID, err := getUserIDFromSession(r)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Authentication required")
+		return
+	}
+
+	// Extract other user ID from URL path
+	path := strings.TrimPrefix(r.URL.Path, "/api/messages/history/")
+	if path == "" {
+		respondWithError(w, http.StatusBadRequest, "User ID is required")
+		return
+	}
+	otherUserID := path
+
+	// Parse pagination parameters
+	limitStr := r.URL.Query().Get("limit")
+	offsetStr := r.URL.Query().Get("offset")
+
+	limit := 10 // Default limit
+	if limitStr != "" {
+		if parsedLimit, err := strconv.Atoi(limitStr); err == nil && parsedLimit > 0 && parsedLimit <= 50 {
+			limit = parsedLimit
+		}
+	}
+
+	offset := 0 // Default offset
+	if offsetStr != "" {
+		if parsedOffset, err := strconv.Atoi(offsetStr); err == nil && parsedOffset >= 0 {
+			offset = parsedOffset
+		}
+	}
+
+	// Get message history from database
+	messageHistory, err := database.GetMessageHistory(currentUserID, otherUserID, limit, offset)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Failed to get message history")
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, messageHistory)
+}
+
+// MessagesHandler handles GET /api/messages and POST /api/messages
+func MessagesHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodPost:
+		CreateMessageHandler(w, r)
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+// CreateMessageHandler handles POST /api/messages - create new message
+func CreateMessageHandler(w http.ResponseWriter, r *http.Request) {
+	// Get user from session
+	userID, err := getUserIDFromSession(r)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Authentication required")
+		return
+	}
+
+	// Parse request body
+	var messageCreation models.MessageCreation
+	if err := json.Unmarshal([]byte(r.FormValue("data")), &messageCreation); err != nil {
+		// Try reading from request body if form data fails
+		decoder := json.NewDecoder(r.Body)
+		if err := decoder.Decode(&messageCreation); err != nil {
+			respondWithError(w, http.StatusBadRequest, "Invalid request body")
+			return
+		}
+	}
+
+	// Validate message
+	if err := messageCreation.Validate(); err != nil {
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// Create message in database
+	message, err := database.CreateMessage(userID, &messageCreation)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Failed to create message")
+		return
+	}
+
+	// Broadcast message via WebSocket if hub is available
+	if wsHub != nil {
+		messageEvent := websocket.CreateMessageEvent(message)
+		wsHub.BroadcastMessageFromAPI(messageEvent, message.ReceiverID)
+	}
+
+	respondWithJSON(w, http.StatusCreated, map[string]interface{}{
+		"message": "Message sent successfully",
+		"data":    message,
+	})
+}
+
+// MarkMessagesReadHandler handles PUT /api/messages/read/{userID}
+func MarkMessagesReadHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPut {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Get user from session
+	currentUserID, err := getUserIDFromSession(r)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Authentication required")
+		return
+	}
+
+	// Extract sender user ID from URL path
+	path := strings.TrimPrefix(r.URL.Path, "/api/messages/read/")
+	if path == "" {
+		respondWithError(w, http.StatusBadRequest, "Sender user ID is required")
+		return
+	}
+	senderUserID := path
+
+	// Mark messages as read
+	err = database.MarkMessagesAsRead(currentUserID, senderUserID)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Failed to mark messages as read")
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, map[string]interface{}{
+		"message": "Messages marked as read",
+	})
+}
+
+// GetOnlineUsersHandler handles GET /api/users/online
+func GetOnlineUsersHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Get user from session (authentication required)
+	_, err := getUserIDFromSession(r)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Authentication required")
+		return
+	}
+
+	// Get online users from database
+	onlineUsers, err := database.GetAllOnlineUsers()
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Failed to get online users")
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, map[string]interface{}{
+		"users": onlineUsers,
+	})
 }
