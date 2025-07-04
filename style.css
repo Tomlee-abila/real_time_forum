@@ -1,4 +1,5 @@
 @import url("https://fonts.googleapis.com/css?family=Poppins:wght@300;400; 500;600&display=swap");
+
 :root {
     --color-white: hsl(252, 30%, 100%);
     --color-light: hsl(252, 30%, 95%);
@@ -7,7 +8,7 @@
     --color-secondary: Thsl(252, 100%, 90%);
     --color-success: hsl(120, 95%, 65%);
     --color-danger: hsl(0, 95%, 65%);
-    --color-dark:hsl(252, 30%, 17%);
+    --color-dark: hsl(252, 30%, 17%);
     --color-black: hsl(252, 30%, 10%);
 
     --border-radius: 2rem;
@@ -38,8 +39,8 @@ body {
 
 /* GENERAL STYLES */
 .container {
-    width: 80%; 
-    margin: 0 auto; 
+    width: 80%;
+    margin: 0 auto;
 }
 
 .profile-photo {
@@ -53,6 +54,7 @@ img {
     display: block;
     width: 100%;
 }
+
 .btn {
     display: inline-block;
     padding: var(--btn-padding);
@@ -62,19 +64,21 @@ img {
     transition: all 300ms ease;
     font-size: 0.9rem;
 }
+
 .btn:hover {
     opacity: 0.8;
 }
+
 .btn-primary {
     background: var(--color-primary);
     color: white;
 }
 
-.text-bold{
+.text-bold {
     font-weight: 500;
 }
 
-.text-muted{
+.text-muted {
     color: var(--color-gray);
 }
 
@@ -186,4 +190,37 @@ main .container .left.profile {
     position: absolute;
     top: -0.2rem;
     right: -0.3rem;
+}
+
+.left .sidebar h3 {
+    margin-left: 1.5rem;
+    font-size: 1rem;
+}
+
+.left .sidebar .active {
+    background: var(--color-light);
+}
+
+.left .sidebar .active i,
+.left .sidebar .active h3 {
+    color: var(--color-primary);
+}
+
+.left .sidebar .active::before {
+    content: "";
+    display: block;
+    width: 0.5rem;
+    height: 100%;
+    position: absolute;
+    background: var(--color-primary);
+}
+
+.left .sidebar .menu-item:first-child.active {
+    border-top-left-radius: var(--card-border-radius);
+    overflow: hidden;
+}
+
+.left .sidebar .menu-item:last-child.active {
+    border-bottom-left-radius: var(--card-border-radius);
+    overflow: hidden;
 }
