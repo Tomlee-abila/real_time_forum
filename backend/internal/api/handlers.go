@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/Tomlee-abila/real_time_forum/backend/internal/database"
 	"github.com/Tomlee-abila/real_time_forum/backend/internal/models"
@@ -23,11 +25,260 @@ func RegisterRoutes(mux *http.ServeMux) {
 	// serve js
 	mux.Handle("/js/", http.StripPrefix("/js/", http.FileServer(http.Dir("frontend/static/js"))))
 
-	// API endpoints
+	// Authentication endpoints
 	mux.HandleFunc("/register", RegisterHandler)
 	mux.HandleFunc("/login", LoginHandler)
 	mux.HandleFunc("/logout", LogoutHandler)
 	mux.HandleFunc("/me", GetCurrentUserHandler)
+
+	// Post endpoints
+	mux.HandleFunc("/posts", PostsHandler)
+	mux.HandleFunc("/posts/", PostDetailHandler) // For /posts/{id} and /posts/{id}/comments
+	mux.HandleFunc("/categories", CategoriesHandler)
+}
+
+// PostsHandler handles GET /posts (get all posts) and POST /posts (create post)
+func PostsHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		GetPostsHandler(w, r)
+	case http.MethodPost:
+		CreatePostHandler(w, r)
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+// CreatePostHandler handles POST /posts - create new post
+func CreatePostHandler(w http.ResponseWriter, r *http.Request) {
+	// Get user from session
+	userID, err := getUserIDFromSession(r)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Authentication required")
+		return
+	}
+
+	var postData models.PostCreation
+	if err := json.NewDecoder(r.Body).Decode(&postData); err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid JSON format")
+		return
+	}
+
+	// Validate input
+	if err := postData.Validate(); err != nil {
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// Create post
+	post, err := database.CreatePost(userID, &postData)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Failed to create post")
+		return
+	}
+
+	respondWithJSON(w, http.StatusCreated, map[string]interface{}{
+		"message": "Post created successfully",
+		"post":    post,
+	})
+}
+
+// PostDetailHandler handles /posts/{id} and /posts/{id}/comments
+func PostDetailHandler(w http.ResponseWriter, r *http.Request) {
+	// Extract post ID from URL path
+	path := strings.TrimPrefix(r.URL.Path, "/posts/")
+	parts := strings.Split(path, "/")
+
+	if len(parts) == 0 || parts[0] == "" {
+		http.Error(w, "Post ID required", http.StatusBadRequest)
+		return
+	}
+
+	postID := parts[0]
+
+	// Check if this is a comment request
+	if len(parts) > 1 && parts[1] == "comments" {
+		if r.Method == http.MethodPost {
+			CreateCommentHandler(w, r, postID)
+		} else {
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+		return
+	}
+
+	// Handle post detail requests
+	switch r.Method {
+	case http.MethodGet:
+		GetPostDetailHandler(w, r, postID)
+	case http.MethodDelete:
+		DeletePostHandler(w, r, postID)
+	default:
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	}
+}
+
+// GetPostDetailHandler handles GET /posts/{id} - get post with comments
+func GetPostDetailHandler(w http.ResponseWriter, r *http.Request, postID string) {
+	postWithComments, err := database.GetPostWithComments(postID)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			respondWithError(w, http.StatusNotFound, "Post not found")
+		} else {
+			respondWithError(w, http.StatusInternalServerError, "Failed to retrieve post")
+		}
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, postWithComments)
+}
+
+// CreateCommentHandler handles POST /posts/{id}/comments - create comment
+func CreateCommentHandler(w http.ResponseWriter, r *http.Request, postID string) {
+	// Get user from session
+	userID, err := getUserIDFromSession(r)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Authentication required")
+		return
+	}
+
+	var commentData models.CommentCreation
+	if err := json.NewDecoder(r.Body).Decode(&commentData); err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid JSON format")
+		return
+	}
+
+	// Validate input
+	if err := commentData.Validate(); err != nil {
+		respondWithError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// Create comment
+	comment, err := database.CreateComment(userID, postID, &commentData)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			respondWithError(w, http.StatusNotFound, "Post not found")
+		} else {
+			respondWithError(w, http.StatusInternalServerError, "Failed to create comment")
+		}
+		return
+	}
+
+	respondWithJSON(w, http.StatusCreated, map[string]interface{}{
+		"message": "Comment created successfully",
+		"comment": comment,
+	})
+}
+
+// DeletePostHandler handles DELETE /posts/{id} - delete post
+func DeletePostHandler(w http.ResponseWriter, r *http.Request, postID string) {
+	// Get user from session
+	userID, err := getUserIDFromSession(r)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Authentication required")
+		return
+	}
+
+	// Delete post
+	err = database.DeletePost(postID, userID)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			respondWithError(w, http.StatusNotFound, "Post not found")
+		} else if strings.Contains(err.Error(), "unauthorized") {
+			respondWithError(w, http.StatusForbidden, err.Error())
+		} else {
+			respondWithError(w, http.StatusInternalServerError, "Failed to delete post")
+		}
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, map[string]string{
+		"message": "Post deleted successfully",
+	})
+}
+
+// CategoriesHandler handles GET /categories - get available categories
+func CategoriesHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	categories := models.GetValidCategories()
+	respondWithJSON(w, http.StatusOK, map[string]interface{}{
+		"categories": categories,
+	})
+}
+
+// Helper function to get user ID from session
+func getUserIDFromSession(r *http.Request) (string, error) {
+	token, err := utils.GetSessionFromRequest(r)
+	if err != nil {
+		return "", err
+	}
+
+	session, err := utils.GetSessionByToken(token)
+	if err != nil {
+		return "", err
+	}
+
+	return session.UserID, nil
+}
+
+// GetPostsHandler handles GET /posts - retrieve posts feed
+func GetPostsHandler(w http.ResponseWriter, r *http.Request) {
+	// Parse query parameters
+	limitStr := r.URL.Query().Get("limit")
+	offsetStr := r.URL.Query().Get("offset")
+	category := r.URL.Query().Get("category")
+
+	// Set default values
+	limit := 10
+	offset := 0
+
+	// Parse limit
+	if limitStr != "" {
+		if parsedLimit, err := strconv.Atoi(limitStr); err == nil && parsedLimit > 0 && parsedLimit <= 50 {
+			limit = parsedLimit
+		}
+	}
+
+	// Parse offset
+	if offsetStr != "" {
+		if parsedOffset, err := strconv.Atoi(offsetStr); err == nil && parsedOffset >= 0 {
+			offset = parsedOffset
+		}
+	}
+
+	var posts []models.Post
+	var err error
+
+	// Get posts by category or all posts
+	if category != "" {
+		posts, err = database.GetPostsByCategory(category, limit, offset)
+	} else {
+		posts, err = database.GetAllPosts(limit, offset)
+	}
+
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Failed to retrieve posts")
+		return
+	}
+
+	// Get total count for pagination
+	var totalCount int
+	if category != "" {
+		totalCount, _ = database.GetPostCountByCategory(category)
+	} else {
+		totalCount, _ = database.GetPostCount()
+	}
+
+	respondWithJSON(w, http.StatusOK, map[string]interface{}{
+		"posts":       posts,
+		"total_count": totalCount,
+		"limit":       limit,
+		"offset":      offset,
+	})
 }
 
 // RegisterHandler handles user registration
