@@ -84,7 +84,7 @@ class AuthManager {
                 this.showView('home');
                 this.updateUserInfo(result.user);
                 this.loadUserStats(); // Load user statistics
-                this.loadOnlineUsers(); // Load online users list
+                this.startMessagingSystem(); // Start WebSocket and load messaging data
                 form.reset();
             } else {
                 // Login failed
@@ -154,12 +154,14 @@ class AuthManager {
             if (response.ok) {
                 // Logout successful
                 this.currentUser = null;
+                this.disconnectMessagingSystem();
                 this.showView('login');
                 this.clearUserInfo();
             } else {
                 console.error('Logout failed:', result.error);
                 // Even if logout fails on server, clear client state
                 this.currentUser = null;
+                this.disconnectMessagingSystem();
                 this.showView('login');
                 this.clearUserInfo();
             }
@@ -167,6 +169,7 @@ class AuthManager {
             console.error('Logout error:', error);
             // Even if network error, clear client state
             this.currentUser = null;
+            this.disconnectMessagingSystem();
             this.showView('login');
             this.clearUserInfo();
         }
@@ -227,6 +230,25 @@ class AuthManager {
         window.currentUserId = null; // Clear for messaging system
         this.clearUserStats(); // Clear user statistics
         this.clearOnlineUsers(); // Clear online users list
+    }
+
+    // Start messaging system after login
+    startMessagingSystem() {
+        // Start WebSocket connection
+        if (window.messagingManager && typeof window.messagingManager.startWebSocketConnection === 'function') {
+            window.messagingManager.startWebSocketConnection();
+        }
+
+        // Load online users list
+        this.loadOnlineUsers();
+    }
+
+    // Disconnect messaging system on logout
+    disconnectMessagingSystem() {
+        // Disconnect WebSocket
+        if (window.messagingManager && window.messagingManager.wsClient) {
+            window.messagingManager.wsClient.disconnect();
+        }
     }
 
     // Load user statistics from API
