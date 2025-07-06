@@ -792,16 +792,25 @@ class MessagingManager {
     updateOnlineUserCount() {
         const onlineUsersElement = document.getElementById('online-users');
         const onlineCountElement = document.getElementById('online-count');
+        const offlineUsersElement = document.getElementById('offline-users');
+        const totalUsersElement = document.getElementById('total-users');
+
+        const onlineCount = this.onlineUsers.size;
 
         if (onlineUsersElement) {
-            const count = this.onlineUsers.size;
-            onlineUsersElement.textContent = count;
+            onlineUsersElement.textContent = onlineCount;
             onlineUsersElement.classList.remove('loading');
         }
 
         if (onlineCountElement) {
-            const count = this.onlineUsers.size;
-            onlineCountElement.textContent = count;
+            onlineCountElement.textContent = onlineCount;
+        }
+
+        // Update offline count based on total users
+        if (offlineUsersElement && totalUsersElement) {
+            const totalCount = parseInt(totalUsersElement.textContent) || 0;
+            const offlineCount = totalCount - onlineCount;
+            offlineUsersElement.textContent = offlineCount;
         }
     }
 
