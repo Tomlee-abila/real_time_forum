@@ -5,6 +5,7 @@ class MessagingManager {
         this.currentConversation = null;
         this.conversations = new Map();
         this.onlineUsers = new Set();
+        this.onlineUserNicknames = new Map(); // Store user ID -> nickname mapping
         this.messageHistory = new Map();
         this.isTyping = false;
         this.typingTimeout = null;
@@ -162,6 +163,10 @@ class MessagingManager {
         if (data.data && data.data.user_status) {
             const user = data.data.user_status;
             this.onlineUsers.add(user.user_id);
+            // Store nickname if provided
+            if (user.nickname) {
+                this.onlineUserNicknames.set(user.user_id, user.nickname);
+            }
             this.updateOnlineUsersList();
             this.updateUserStatusInConversations(user.user_id, true);
             this.updateOnlineUserCount();
@@ -175,6 +180,8 @@ class MessagingManager {
         if (data.data && data.data.user_status) {
             const user = data.data.user_status;
             this.onlineUsers.delete(user.user_id);
+            // Keep nickname in cache for potential reconnection
+            // this.onlineUserNicknames.delete(user.user_id);
             this.updateOnlineUsersList();
             this.updateUserStatusInConversations(user.user_id, false);
             this.updateOnlineUserCount();
@@ -334,10 +341,12 @@ class MessagingManager {
             if (response.ok) {
                 const data = await response.json();
                 this.onlineUsers.clear();
+                this.onlineUserNicknames.clear();
 
                 if (data.users) {
                     data.users.forEach(user => {
                         this.onlineUsers.add(user.user_id);
+                        this.onlineUserNicknames.set(user.user_id, user.nickname);
                     });
                 }
 
@@ -578,7 +587,9 @@ class MessagingManager {
 
         const name = document.createElement('div');
         name.className = 'user-name';
-        name.textContent = `User ${userId}`; // This should be the actual nickname
+        // Use actual nickname from stored data
+        const nickname = this.onlineUserNicknames.get(userId) || `User ${userId}`;
+        name.textContent = nickname;
 
         const indicator = document.createElement('div');
         indicator.className = 'online-indicator';
@@ -601,7 +612,9 @@ class MessagingManager {
         if (inputArea) inputArea.classList.remove('hidden');
 
         if (userName) {
-            userName.textContent = `User ${userId}`; // Should be actual nickname
+            // Use actual nickname from stored data
+            const nickname = this.onlineUserNicknames.get(userId) || `User ${userId}`;
+            userName.textContent = nickname;
         }
 
         if (userStatus) {
