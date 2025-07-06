@@ -26,8 +26,8 @@ class MessagingManager {
         console.log('Initializing MessagingManager');
         this.setupWebSocket();
         this.setupEventListeners();
-        this.loadConversations();
-        this.loadOnlineUsers();
+        // Don't load conversations and online users until user is logged in
+        // These will be called from auth.js after successful login
     }
 
     // Setup WebSocket connection and handlers
@@ -51,10 +51,19 @@ class MessagingManager {
                 onDisconnect: () => this.onWebSocketDisconnect()
             });
 
-            // Connect to WebSocket
-            this.wsClient.connect();
+            // Don't auto-connect - will be called after user login
         } else {
             console.error('WebSocketClient not available');
+        }
+    }
+
+    // Start WebSocket connection (called after user login)
+    startWebSocketConnection() {
+        if (this.wsClient && !this.wsClient.isConnected) {
+            console.log('Starting WebSocket connection after login');
+            this.wsClient.connect();
+            this.loadConversations();
+            this.loadOnlineUsers();
         }
     }
 
