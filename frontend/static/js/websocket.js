@@ -25,9 +25,11 @@ class WebSocketClient {
 
         // Check if user is authenticated before connecting
         if (!window.currentUserId) {
-            console.log('WebSocket connection skipped - user not authenticated');
+            console.log('WebSocket connection skipped - user not authenticated, currentUserId:', window.currentUserId);
             return;
         }
+
+        console.log('WebSocket connecting for user:', window.currentUserId);
 
         try {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';

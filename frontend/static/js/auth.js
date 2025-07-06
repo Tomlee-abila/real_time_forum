@@ -256,9 +256,20 @@ class AuthManager {
 
     // Start messaging system after login
     startMessagingSystem() {
+        // Ensure messaging manager is available
+        if (!window.messagingManager) {
+            console.log('Messaging manager not ready, retrying in 100ms...');
+            setTimeout(() => this.startMessagingSystem(), 100);
+            return;
+        }
+
+        console.log('Starting messaging system...');
+
         // Start WebSocket connection
-        if (window.messagingManager && typeof window.messagingManager.startWebSocketConnection === 'function') {
+        if (typeof window.messagingManager.startWebSocketConnection === 'function') {
             window.messagingManager.startWebSocketConnection();
+        } else {
+            console.error('startWebSocketConnection method not found');
         }
 
         // Load online users list
