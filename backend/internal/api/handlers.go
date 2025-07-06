@@ -676,43 +676,17 @@ func GetOnlineUsersHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get online users from active sessions (primary source)
-	sessionUsers, err := database.GetActiveSessionUsers()
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Failed to get online users")
+	// Get online users from WebSocket hub (real-time data)
+	if wsHub == nil {
+		respondWithError(w, http.StatusInternalServerError, "WebSocket hub not available")
 		return
 	}
 
-	// Enhance with WebSocket connection status if hub is available
-	if wsHub != nil {
-		wsUsers := wsHub.GetOnlineUserDetails()
-		wsUserMap := make(map[string]bool)
-
-		// Create map of WebSocket connected users
-		for _, wsUser := range wsUsers {
-			if userID, ok := wsUser["user_id"].(string); ok {
-				wsUserMap[userID] = true
-			}
-		}
-
-		// Mark session users with WebSocket connection status
-		for i := range sessionUsers {
-			if userID, ok := sessionUsers[i]["user_id"].(string); ok {
-				sessionUsers[i]["websocket_connected"] = wsUserMap[userID]
-			} else {
-				sessionUsers[i]["websocket_connected"] = false
-			}
-		}
-	} else {
-		// If no WebSocket hub, mark all as not WebSocket connected
-		for i := range sessionUsers {
-			sessionUsers[i]["websocket_connected"] = false
-		}
-	}
+	onlineUsers := wsHub.GetOnlineUserDetails()
 
 	respondWithJSON(w, http.StatusOK, map[string]interface{}{
-		"users": sessionUsers,
-		"count": len(sessionUsers),
+		"users": onlineUsers,
+		"count": len(onlineUsers),
 	})
 }
 
@@ -730,11 +704,10 @@ func GetUserStatsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get online user count from active sessions (primary source)
-	onlineCount, err := database.GetActiveSessionCount()
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Failed to get online user count")
-		return
+	// Get online user count from WebSocket hub
+	onlineCount := 0
+	if wsHub != nil {
+		onlineCount = wsHub.GetOnlineUserCount()
 	}
 
 	// Get total registered users from database
