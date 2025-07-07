@@ -175,32 +175,11 @@ class AuthManager {
         }
     }
 
-    async checkAuthStatus() {
-        try {
-            // Check if user has a valid session by calling /me endpoint
-            const response = await fetch('/me', {
-                method: 'GET',
-                credentials: 'include' // Include cookies
-            });
-
-            if (response.ok) {
-                // User is already logged in
-                const result = await response.json();
-                this.currentUser = result.user;
-                window.currentUserId = result.user.id; // Set for messaging system
-                this.showView('home');
-                this.updateUserInfo(result.user);
-                this.loadUserStats(); // Load user statistics
-                this.startMessagingSystem(); // Start WebSocket and load messaging data
-            } else {
-                // No valid session, show login view
-                this.showView('login');
-            }
-        } catch (error) {
-            console.error('Error checking auth status:', error);
-            // On error, show login view
-            this.showView('login');
-        }
+    checkAuthStatus() {
+        // Always show login view initially - no automatic login
+        // Users must explicitly log in each time they visit
+        this.showView('login');
+        console.log('Showing login view - no automatic login');
     }
 
     showView(viewName) {
