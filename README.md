@@ -6,87 +6,205 @@ The real_time_forum is a single-page application (SPA) with a Go backend and a v
 
 ## File Structure Explanation
 
-The project is organized to promote modularity, maintainability, and scalability. Below is the file structure with explanations for each directory and file:
+The project is organized to promote modularity, maintainability, and scalability. Below is the comprehensive file structure with explanations for each directory and file:
 
 ```bash
 real_time_forum/
-├── backend/
+├── backend/                         # Go backend server
 │   ├── cmd/
-│   │   └── main.go                  # Entry point for the Go server, initializes HTTP and WebSocket servers
-│   ├── internal/
-│   │   ├── api/
-│   │   │   ├── handlers.go          # HTTP handlers for REST endpoints (e.g., /register, /login, /posts)
-│   │   │   └── middleware.go        # Middleware for authentication, session validation, and request logging
-│   │   ├── database/
-│   │   │   ├── db.go                # Initializes SQLite connection and runs migrations
-│   │   │   ├── user.go              # Database operations for users (e.g., create, authenticate)
-│   │   │   ├── post.go              # Database operations for posts and comments
-│   │   │   └── message.go           # Database operations for private messages
-│   │   ├── models/
-│   │   │   ├── user.go              # User struct and methods (e.g., validation)
-│   │   │   ├── post.go              # Post and comment structs
-│   │   │   └── message.go           # Message struct for private messages
-│   │   ├── websocket/
-│   │   │   ├── manager.go           # Manages WebSocket clients and event handlers
-│   │   │   ├── client.go            # Represents a WebSocket client with connection and egress channel
-│   │   │   ├── event.go             # Defines event struct for WebSocket messages
-│   │   │   └── handlers.go          # Handles specific WebSocket events (e.g., message, user_status)
-│   │   └── utils/
-│   │       └── session.go           # Manages session tokens and cookies
-│   ├── go.mod                       # Go module file for dependency management
-│   └── go.sum                       # Checksum for Go dependencies
-├── frontend/
-│   ├── static/
-│   │   ├── css/
-│   │   │   └── styles.css           # Styles for the SPA (e.g., layout, post feed, chat UI)
-│   │   ├── js/
-│   │   │   ├── main.js              # Main JS for initializing SPA and WebSocket client
-│   │   │   ├── auth.js              # Handles registration, login, and logout
-│   │   │   ├── posts.js             # Manages post creation, commenting, and feed display
-│   │   │   └── messages.js          # Handles private messaging UI and WebSocket events
-│   │   └── index.html               # Single HTML file for the SPA
-├── migrations/
-│   └── 001_init.sql                 # SQLite schema for users, posts, comments, messages, and sessions
-└── README.md                        # Project overview, setup instructions, and usage
+│   │   └── main.go                  # Entry point: initializes database, HTTP server, and WebSocket hub
+│   └── internal/                    # Internal backend packages (not importable by external modules)
+│       ├── api/
+│       │   ├── handlers.go          # HTTP handlers for all REST endpoints and WebSocket upgrade
+│       │   └── middleware.go        # Authentication middleware and request validation
+│       ├── database/
+│       │   ├── db.go                # Database initialization, connection management, and migrations
+│       │   ├── user.go              # User CRUD operations, authentication, and session management
+│       │   ├── post.go              # Post and comment database operations with filtering/pagination
+│       │   └── message.go           # Private message storage, retrieval, and conversation management
+│       ├── models/
+│       │   ├── user.go              # User data structures, validation, and business logic
+│       │   ├── post.go              # Post and comment models with category validation
+│       │   └── message.go           # Message models for real-time communication
+│       ├── utils/
+│       │   └── session.go           # Session token generation, validation, and cookie management
+│       └── websocket/
+│           ├── manager.go           # WebSocket hub: manages clients, broadcasting, and user tracking
+│           ├── client.go            # Individual WebSocket client with read/write pumps and heartbeat
+│           ├── event.go             # WebSocket event types and message structure definitions
+│           └── handlers.go          # WebSocket upgrade handler and authentication
+├── frontend/                        # Frontend single-page application
+│   └── static/
+│       ├── css/
+│       │   ├── style.css            # Main application styles and responsive design
+│       │   └── styles.css           # Additional styling components
+│       ├── js/
+│       │   ├── main.js              # Application initialization and global utilities
+│       │   ├── auth.js              # Authentication: login, logout, session management, user stats
+│       │   ├── posts.js             # Post management: creation, display, commenting, filtering
+│       │   ├── messages.js          # Real-time messaging: WebSocket events, chat UI, conversations
+│       │   └── websocket.js         # WebSocket client: connection management, heartbeat, reconnection
+│       ├── templates/               # HTML templates for different views
+│       │   ├── home.html            # Main forum view with posts and messaging
+│       │   ├── login.html           # User login form
+│       │   └── signup.html          # User registration form
+│       └── index.html               # Main SPA entry point with dynamic content loading
+├── migrations/                      # Database schema migrations
+│   ├── 001_init.sql                 # Initial schema: users, posts, comments, messages, sessions
+│   └── 002_add_user_status.sql      # User status tracking for online/offline functionality
+├── go.mod                           # Go module dependencies and version management
+├── go.sum                           # Dependency checksums for security and reproducibility
+├── forum.db                         # SQLite database file (created at runtime)
+├── real_time_forum                  # Compiled binary executable
+└── README.md                        # Project documentation and setup instructions
 ```
 
-- **backend/cmd/server/main.go:** The entry point initializes the SQLite database, sets up the HTTP server (using net/http), and starts the WebSocket manager. It binds API routes and WebSocket endpoints.
+### Detailed Component Explanations
 
-    - **api/:** Handles HTTP requests for REST endpoints (e.g., user registration, post creation) and middleware for authentication.
+#### Backend Components
 
-    - **database/:** Manages SQLite connections and CRUD operations for users, posts, comments, and messages.
+- **`backend/cmd/main.go`**: Application entry point that orchestrates the entire server startup:
+  - Initializes SQLite database and runs migrations
+  - Creates and starts the WebSocket hub for real-time communication
+  - Sets up HTTP routes and middleware
+  - Configures the server to listen on port 8080
 
-    - **models/:** Defines data structures (structs) and validation logic for users, posts, and messages.
+- **`backend/internal/api/`**: HTTP API layer handling REST endpoints:
+  - **`handlers.go`**: Comprehensive HTTP handlers for all endpoints including user authentication, post management, messaging APIs, and WebSocket upgrade
+  - **`middleware.go`**: Authentication middleware for session validation and request processing
 
-    - **websocket/**: Implements real-time functionality using the Manager, Client, and Event architecture for private messages and user status updates.
-    - **utils/:** Contains utilities like session management for handling cookies and tokens.
-- **frontend/static/:** Contains the SPA's assets:
-    - **css/:** Styles the UI, including responsive layouts for the post feed and chat.
-    - **js/:** Manages frontend logic, including DOM manipulation, WebSocket communication, and event handling (e.g., throttle/debounce for message scrolling).
-    - **index.html:** The single HTML file serving the SPA, with dynamic content managed by JavaScript.
-- **migrations/:** Stores SQL scripts for initializing and updating the SQLite database schema.
-- **README.md:** Documents setup, running the server, and contributing guidelines.
+- **`backend/internal/database/`**: Data persistence layer with SQLite operations:
+  - **`db.go`**: Database connection management, initialization, and migration execution
+  - **`user.go`**: User operations including registration, authentication, session management, and online user tracking
+  - **`post.go`**: Post and comment CRUD operations with category filtering and pagination support
+  - **`message.go`**: Private messaging system with conversation management and message history
+
+- **`backend/internal/models/`**: Data models and business logic:
+  - **`user.go`**: User struct with validation for registration, login, and profile management
+  - **`post.go`**: Post and comment models with category validation and content structure
+  - **`message.go`**: Message models for real-time communication with sender/receiver relationships
+
+- **`backend/internal/utils/`**: Utility functions and helpers:
+  - **`session.go`**: Session token generation, validation, cookie management, and security utilities
+
+- **`backend/internal/websocket/`**: Real-time communication infrastructure:
+  - **`manager.go`**: WebSocket hub managing client connections, message broadcasting, and user presence tracking
+  - **`client.go`**: Individual client connection handling with read/write pumps, heartbeat mechanism, and connection lifecycle
+  - **`event.go`**: WebSocket event type definitions and message structure for real-time communication
+  - **`handlers.go`**: WebSocket connection upgrade, authentication, and initial client setup
+
+#### Frontend Components
+
+- **`frontend/static/index.html`**: Single-page application entry point with dynamic content areas and template loading
+
+- **`frontend/static/templates/`**: HTML templates for different application views:
+  - **`home.html`**: Main forum interface with post feed and messaging sidebar
+  - **`login.html`**: User authentication form with validation
+  - **`signup.html`**: User registration form with field validation
+
+- **`frontend/static/css/`**: Styling and responsive design:
+  - **`style.css`**: Main application styles, layout, and responsive design
+  - **`styles.css`**: Additional component-specific styling
+
+- **`frontend/static/js/`**: Frontend application logic:
+  - **`main.js`**: Application initialization, global utilities, and component coordination
+  - **`auth.js`**: Authentication management including login, logout, session handling, user statistics, and periodic data refresh
+  - **`posts.js`**: Post management including creation, display, commenting, filtering, and pagination
+  - **`messages.js`**: Real-time messaging system with WebSocket event handling, conversation management, and chat UI
+  - **`websocket.js`**: WebSocket client with connection management, heartbeat, automatic reconnection, and error handling
+
+#### Database and Configuration
+
+- **`migrations/`**: Database schema evolution:
+  - **`001_init.sql`**: Initial database schema with users, posts, comments, messages, and sessions tables
+  - **`002_add_user_status.sql`**: User status tracking for online/offline functionality
+
+- **`go.mod` & `go.sum`**: Go module dependency management with version control and security checksums
+
+- **`forum.db`**: SQLite database file created at runtime containing all application data
+
+- **`real_time_forum`**: Compiled binary executable ready for deployment
 
 ### Project Architecture
-- **Backend:**
-    - **HTTP Server:** Uses net/http to serve REST endpoints for authentication, posts, and message history. Middleware validates sessions using cookies.
-    - **WebSocket Server:** Uses Gorilla WebSocket to handle real-time communication. The Manager struct tracks connected clients, routes events (e.g., private messages), and broadcasts user status updates.
-    - **Database:** SQLite stores user data, posts, comments, messages, and sessions. A connection pool ensures efficient query handling.
-    - **Session Management:** Uses cookies with secure tokens stored in the sessions table to authenticate users.
-- **Frontend:**
 
-    - A single HTML page (index.html) serves as the SPA, with JavaScript dynamically rendering views (e.g., login, post feed, chat).
-    - WebSocket client connects to the backend to send/receive real-time messages and user status updates.
-    - JavaScript handles pagination for message history (loading 10 messages at a time) with throttling to optimize scrolling.
-    
+#### Backend Architecture
+- **HTTP Server (net/http):**
+  - RESTful API endpoints for authentication, post management, and message history
+  - Session-based authentication using secure cookies
+  - Middleware for request validation and user authorization
+  - Static file serving for frontend assets
 
-- **Real-Time Features:**
+- **WebSocket Server (Gorilla WebSocket):**
+  - Real-time communication hub with client connection management
+  - Event-driven architecture for message broadcasting
+  - Heartbeat mechanism (ping/pong) for connection health monitoring
+  - Automatic cleanup of disconnected clients and duplicate connection handling
+  - User presence tracking for online/offline status
 
-    - Private messages are sent via WebSocket and stored in the database.
-    - User online/offline status is broadcast to update the chat sidebar in real time.
+- **Database Layer (SQLite):**
+  - Persistent storage for users, posts, comments, messages, and sessions
+  - Migration system for schema evolution
+  - Optimized queries with proper indexing
+  - Transaction support for data consistency
 
-- **Security:**
+- **Session Management:**
+  - Secure token generation using UUIDs and cryptographic randomness
+  - Cookie-based session storage with configurable expiration (24 hours)
+  - Session cleanup and validation mechanisms
 
-    - Passwords are hashed with **bcrypt**.
-    - Session tokens use UUIDs for uniqueness.
-    - WebSocket messages are validated to prevent malformed data.
+#### Frontend Architecture
+- **Single-Page Application (SPA):**
+  - Dynamic view rendering using vanilla JavaScript
+  - Template-based UI with modular HTML components
+  - Responsive design supporting desktop and mobile devices
+  - Client-side routing and state management
+
+- **WebSocket Client:**
+  - Automatic connection management with reconnection logic
+  - Heartbeat response handling for connection stability
+  - Event-driven message processing
+  - Connection state management preventing multiple simultaneous connections
+
+- **Modular JavaScript Architecture:**
+  - Separation of concerns: authentication, posts, messaging, WebSocket handling
+  - Event-driven communication between modules
+  - Periodic data refresh for real-time statistics
+  - Error handling and user feedback systems
+
+#### Real-Time Features
+- **Private Messaging:**
+  - WebSocket-based real-time message delivery
+  - Message persistence in database
+  - Conversation management with message history
+  - Pagination support (10 messages per page) with infinite scroll
+
+- **User Presence System:**
+  - Real-time online/offline status tracking
+  - WebSocket connection-based presence detection
+  - User statistics with live updates
+  - Automatic cleanup on disconnection
+
+- **Live Updates:**
+  - Real-time user count updates
+  - Instant message delivery and read receipts
+  - Dynamic online user list with nicknames
+  - Connection status indicators
+
+#### Security Features
+- **Authentication & Authorization:**
+  - Password hashing using bcrypt with salt
+  - Secure session token generation and validation
+  - Cookie-based authentication with HttpOnly flags
+  - Session expiration and cleanup
+
+- **Data Validation:**
+  - Input sanitization and validation on both client and server
+  - WebSocket message validation to prevent malformed data
+  - SQL injection prevention using parameterized queries
+  - XSS protection through proper data encoding
+
+- **Connection Security:**
+  - WebSocket authentication before connection establishment
+  - Graceful connection handling and cleanup
+  - Rate limiting and connection abuse prevention
+  - Secure cookie configuration for production deployment
