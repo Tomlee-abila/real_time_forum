@@ -538,6 +538,7 @@ main .container .right {
     display: grid;
     place-items: center;
     font-size: 0.9rem;
+    display: none;
 }
 
 .customize-theme .card {
@@ -640,7 +641,7 @@ main .container .right {
     gap: 1.5rem;
 }
 
-.customize-theme .choose-bg > div {
+.customize-theme .choose-bg>div {
     padding: var(--card-padding);
     width: 100%;
     display: flex;
@@ -651,7 +652,7 @@ main .container .right {
     cursor: pointer;
 }
 
-.customize-theme .choose-bg > div.active {
+.customize-theme .choose-bg>div.active {
     border: 2px solid var(--color-primary);
 }
 
@@ -670,10 +671,41 @@ main .container .right {
     color: white;
 }
 
-.customize-theme .choose-bg > div span {
+.customize-theme .choose-bg>div span {
     width: 2rem;
     height: 2em;
     border: 2px solid var(--color-gray);
     border-radius: 50%;
     margin-right: 1rem;
+}
+
+/* ==================== 
+MEDIA QUERIES FOR SMALL LAPTOPS AND BIG TABLETS
+========================== */
+@media screen and (max-width: 1200px) {
+    .container {
+        width: 96%;
+    }
+
+    main .container {
+        grid-template-columns: 5rem auto 30vw;
+        gap: 1rem;
+    }
+
+    .left {
+        width: 5rem;
+        z-index: 5;
+    }
+
+    main .container .left .profile {
+        display: none;
+    }
+
+    .sidebar h3 {
+        display: none;
+    }
+
+    .left .btn {
+        display: none;
+    }
 }
