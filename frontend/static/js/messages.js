@@ -169,8 +169,9 @@ class MessagingManager {
             }
             this.updateOnlineUsersList();
             this.updateUserStatusInConversations(user.user_id, true);
-            this.updateOnlineUserCount();
             this.refreshOnlineUsersDisplay();
+            // Refresh global statistics from server
+            this.refreshUserStats();
         }
     }
 
@@ -184,8 +185,9 @@ class MessagingManager {
             // this.onlineUserNicknames.delete(user.user_id);
             this.updateOnlineUsersList();
             this.updateUserStatusInConversations(user.user_id, false);
-            this.updateOnlineUserCount();
             this.refreshOnlineUsersDisplay();
+            // Refresh global statistics from server
+            this.refreshUserStats();
         }
     }
 
@@ -788,36 +790,19 @@ class MessagingManager {
         }
     }
 
-    // Update online user count in statistics
-    updateOnlineUserCount() {
-        const onlineUsersElement = document.getElementById('online-users');
-        const onlineCountElement = document.getElementById('online-count');
-        const offlineUsersElement = document.getElementById('offline-users');
-        const totalUsersElement = document.getElementById('total-users');
 
-        const onlineCount = this.onlineUsers.size;
-
-        if (onlineUsersElement) {
-            onlineUsersElement.textContent = onlineCount;
-            onlineUsersElement.classList.remove('loading');
-        }
-
-        if (onlineCountElement) {
-            onlineCountElement.textContent = onlineCount;
-        }
-
-        // Update offline count based on total users
-        if (offlineUsersElement && totalUsersElement) {
-            const totalCount = parseInt(totalUsersElement.textContent) || 0;
-            const offlineCount = totalCount - onlineCount;
-            offlineUsersElement.textContent = offlineCount;
-        }
-    }
 
     // Refresh online users display by calling the auth manager
     refreshOnlineUsersDisplay() {
         if (window.authManager && typeof window.authManager.loadOnlineUsers === 'function') {
             window.authManager.loadOnlineUsers();
+        }
+    }
+
+    // Refresh user statistics by calling the auth manager
+    refreshUserStats() {
+        if (window.authManager && typeof window.authManager.loadUserStats === 'function') {
+            window.authManager.loadUserStats();
         }
     }
 }
