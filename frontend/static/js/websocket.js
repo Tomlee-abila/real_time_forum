@@ -87,17 +87,22 @@ class WebSocketClient {
     onClose(event) {
         console.log('WebSocket connection closed:', event.code, event.reason);
         this.isConnected = false;
-        
+
         // Notify connection listeners
         this.connectionListeners.forEach(listener => {
             if (typeof listener.onDisconnect === 'function') {
                 listener.onDisconnect();
             }
         });
-        
-        // Attempt to reconnect if not a clean close
-        if (event.code !== 1000) {
+
+        // Only reconnect for specific error conditions, not user-initiated closes
+        const shouldReconnect = this.shouldAttemptReconnect(event.code, event.reason);
+        if (shouldReconnect) {
+            console.log(`Attempting reconnection for close code: ${event.code}`);
             this.scheduleReconnect();
+        } else {
+            console.log(`Not reconnecting for close code: ${event.code} (${event.reason})`);
+            this.reconnectAttempts = 0; // Reset for future connections
         }
     }
 
@@ -105,6 +110,40 @@ class WebSocketClient {
     onError(event) {
         console.error('WebSocket error:', event);
         this.isConnected = false;
+    }
+
+    // Determine if we should attempt reconnection based on close code
+    shouldAttemptReconnect(code, reason) {
+        // Don't reconnect for these codes:
+        switch (code) {
+            case 1000: // Normal closure
+                return false;
+            case 1001: // Going away (tab closing, navigation)
+                return false;
+            case 1002: // Protocol error
+                return false;
+            case 1003: // Unsupported data
+                return false;
+            case 1005: // No status received
+                return false;
+            case 1015: // TLS handshake failure
+                return false;
+            case 4000: // Custom: Authentication failed
+            case 4001: // Custom: Authorization failed
+            case 4002: // Custom: Invalid session
+                console.log('Authentication/authorization failed, not reconnecting');
+                return false;
+            case 1006: // Abnormal closure (network issues)
+            case 1011: // Server error
+            case 1012: // Service restart
+            case 1013: // Try again later
+            case 1014: // Bad gateway
+                // These might be temporary, allow reconnection
+                return true;
+            default:
+                // For unknown codes, be conservative and allow reconnection
+                return true;
+        }
     }
 
     // Schedule reconnection attempt
