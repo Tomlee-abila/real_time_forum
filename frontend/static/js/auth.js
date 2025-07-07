@@ -3,6 +3,7 @@
 class AuthManager {
     constructor() {
         this.currentUser = null;
+        this.statsRefreshInterval = null;
         this.init();
     }
 
@@ -84,6 +85,7 @@ class AuthManager {
                 this.showView('home');
                 this.updateUserInfo(result.user);
                 this.loadUserStats(); // Load user statistics
+                this.startStatsRefresh(); // Start periodic statistics refresh
                 this.startMessagingSystem(); // Start WebSocket and load messaging data
                 form.reset();
             } else {
@@ -229,6 +231,7 @@ class AuthManager {
             userDetails.innerHTML = '';
         }
         window.currentUserId = null; // Clear for messaging system
+        this.stopStatsRefresh(); // Stop periodic statistics refresh
         this.clearUserStats(); // Clear user statistics
         this.clearOnlineUsers(); // Clear online users list
     }
@@ -260,6 +263,24 @@ class AuthManager {
         // Disconnect WebSocket
         if (window.messagingManager && window.messagingManager.wsClient) {
             window.messagingManager.wsClient.disconnect();
+        }
+    }
+
+    // Start periodic statistics refresh
+    startStatsRefresh() {
+        // Refresh statistics every 30 seconds
+        this.statsRefreshInterval = setInterval(() => {
+            this.loadUserStats();
+        }, 30000);
+        console.log('Started periodic statistics refresh (30s interval)');
+    }
+
+    // Stop periodic statistics refresh
+    stopStatsRefresh() {
+        if (this.statsRefreshInterval) {
+            clearInterval(this.statsRefreshInterval);
+            this.statsRefreshInterval = null;
+            console.log('Stopped periodic statistics refresh');
         }
     }
 
