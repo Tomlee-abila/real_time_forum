@@ -15,6 +15,9 @@ class WebSocketClient {
         this.onMessage = this.onMessage.bind(this);
         this.onClose = this.onClose.bind(this);
         this.onError = this.onError.bind(this);
+
+        // Add page unload handler for graceful disconnect
+        this.setupPageUnloadHandler();
     }
 
     // Connect to WebSocket server
@@ -236,6 +239,22 @@ class WebSocketClient {
         this.send(pongMessage);
     }
 
+    // Setup page unload handler for graceful disconnect
+    setupPageUnloadHandler() {
+        window.addEventListener('beforeunload', () => {
+            if (this.isConnected && this.ws) {
+                // Send a clean disconnect
+                this.ws.close(1000, 'Page unloading');
+            }
+        });
+
+        window.addEventListener('unload', () => {
+            if (this.isConnected && this.ws) {
+                this.ws.close(1000, 'Page unloading');
+            }
+        });
+    }
+
     // Disconnect WebSocket
     disconnect() {
         if (this.ws) {
@@ -243,6 +262,7 @@ class WebSocketClient {
             this.ws = null;
         }
         this.isConnected = false;
+        this.isConnecting = false;
     }
 
     // Get connection status
