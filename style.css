@@ -709,6 +709,10 @@ MEDIA QUERIES FOR SMALL LAPTOPS AND BIG TABLETS
     .left .btn {
         display: none;
     }
+
+    .customize-theme .card{
+        width: 80vw;
+    }
 }
 
 /* ==================== 
@@ -751,6 +755,10 @@ MEDIA QUERIES FOR SMALL TABLETS AND MOBILE PHONES
 
     main .container .right{
         display: none;
+    }
+    
+    .customize-theme .card{
+        width: 92vw;
     }
     
 }
