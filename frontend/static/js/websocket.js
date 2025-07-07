@@ -3,6 +3,7 @@ class WebSocketClient {
     constructor() {
         this.ws = null;
         this.isConnected = false;
+        this.isConnecting = false; // Prevent multiple simultaneous connection attempts
         this.reconnectAttempts = 0;
         this.maxReconnectAttempts = 5;
         this.reconnectDelay = 1000; // Start with 1 second
@@ -23,6 +24,11 @@ class WebSocketClient {
             return;
         }
 
+        if (this.isConnecting) {
+            console.log('WebSocket connection already in progress');
+            return;
+        }
+
         // Check if user is authenticated before connecting
         if (!window.currentUserId) {
             console.log('WebSocket connection skipped - user not authenticated, currentUserId:', window.currentUserId);
@@ -30,6 +36,7 @@ class WebSocketClient {
         }
 
         console.log('WebSocket connecting for user:', window.currentUserId);
+        this.isConnecting = true;
 
         try {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -45,6 +52,7 @@ class WebSocketClient {
             
         } catch (error) {
             console.error('Failed to create WebSocket connection:', error);
+            this.isConnecting = false;
             this.scheduleReconnect();
         }
     }
@@ -53,6 +61,7 @@ class WebSocketClient {
     onOpen(event) {
         console.log('WebSocket connected successfully');
         this.isConnected = true;
+        this.isConnecting = false;
         this.reconnectAttempts = 0;
         this.reconnectDelay = 1000;
         
@@ -94,6 +103,7 @@ class WebSocketClient {
     onClose(event) {
         console.log('WebSocket connection closed:', event.code, event.reason);
         this.isConnected = false;
+        this.isConnecting = false;
 
         // Notify connection listeners
         this.connectionListeners.forEach(listener => {
@@ -117,6 +127,7 @@ class WebSocketClient {
     onError(event) {
         console.error('WebSocket error:', event);
         this.isConnected = false;
+        this.isConnecting = false;
     }
 
     // Determine if we should attempt reconnection based on close code
