@@ -68,8 +68,15 @@ class WebSocketClient {
     onMessage(event) {
         try {
             const data = JSON.parse(event.data);
+
+            // Handle system events first
+            if (data.type === 'ping') {
+                this.handlePing(data);
+                return;
+            }
+
             console.log('WebSocket message received:', data);
-            
+
             // Route message to appropriate handler
             if (data.type && this.messageHandlers.has(data.type)) {
                 const handler = this.messageHandlers.get(data.type);
@@ -77,7 +84,7 @@ class WebSocketClient {
             } else {
                 console.warn('No handler for message type:', data.type);
             }
-            
+
         } catch (error) {
             console.error('Failed to parse WebSocket message:', error);
         }
@@ -205,6 +212,17 @@ class WebSocketClient {
         if (index > -1) {
             this.connectionListeners.splice(index, 1);
         }
+    }
+
+    // Handle ping from server
+    handlePing(data) {
+        console.log('Received ping, sending pong');
+        const pongMessage = {
+            type: 'pong',
+            timestamp: Date.now(),
+            user_id: window.currentUserId
+        };
+        this.send(pongMessage);
     }
 
     // Disconnect WebSocket
