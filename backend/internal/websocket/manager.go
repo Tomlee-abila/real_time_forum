@@ -66,13 +66,29 @@ func (h *Hub) registerClient(client *Client) {
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
 
-	h.clients[client] = true
-	h.userClients[client.GetUserID()] = client
+	userID := client.GetUserID()
 
-	log.Printf("Client registered: %s (%s)", client.GetNickname(), client.GetUserID())
+	// Check if user already has a connection
+	if existingClient, exists := h.userClients[userID]; exists {
+		log.Printf("User %s (%s) already connected, closing existing connection", client.GetNickname(), userID)
+
+		// Clean up existing client
+		delete(h.clients, existingClient)
+		delete(h.userClients, userID)
+		close(existingClient.send)
+
+		// Note: We don't send disconnect events here to avoid confusion
+		// The old connection will be cleaned up naturally
+	}
+
+	// Register new client
+	h.clients[client] = true
+	h.userClients[userID] = client
+
+	log.Printf("Client registered: %s (%s)", client.GetNickname(), userID)
 
 	// Send connected event to client
-	connectedEvent := CreateConnectedEvent(client.GetUserID())
+	connectedEvent := CreateConnectedEvent(userID)
 	h.sendToClient(client, connectedEvent)
 }
 
