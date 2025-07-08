@@ -55,7 +55,6 @@ func (h *Hub) Run() {
 			h.registerClient(client)
 
 		case client := <-h.unregister:
-		Payee:
 			h.unregisterClient(client)
 
 		case message := <-h.broadcast:
