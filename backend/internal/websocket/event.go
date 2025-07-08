@@ -75,6 +75,13 @@ type MessageReadEvent struct {
 	MessageIDs []string `json:"message_ids,omitempty"`
 }
 
+// UserStatsEvent represents user statistics
+type UserStatsEvent struct {
+	TotalUsers   int `json:"total_users"`
+	OnlineUsers  int `json:"online_users"`
+	OfflineUsers int `json:"offline_users"`
+}
+
 // CreateEvent creates a new WebSocket event
 func CreateEvent(eventType EventType, data interface{}, userID string) *Event {
 	return &Event{
