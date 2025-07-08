@@ -91,6 +91,9 @@ func (h *Hub) registerClient(client *Client) {
 	// Send connected event to client
 	connectedEvent := CreateConnectedEvent(userID)
 	h.sendToClient(client, connectedEvent)
+
+	// Broadcast updated user stats
+	h.broadcastUserStats()
 }
 
 // unregisterClient unregisters a client
