@@ -1,5 +1,7 @@
 package websocket
 
+import "time"
+
 // EventType represents different types of WebSocket events
 type EventType string
 
@@ -14,6 +16,7 @@ const (
 	EventUserOnline  EventType = "user_online"
 	EventUserOffline EventType = "user_offline"
 	EventUserList    EventType = "user_list"
+	EventUserStats   EventType = "user_stats"
 
 	// System events
 	EventError        EventType = "error"
@@ -77,7 +80,7 @@ func CreateEvent(eventType EventType, data interface{}, userID string) *Event {
 	return &Event{
 		Type:      eventType,
 		Data:      data,
-		Timestamp: "2025-01-01T00:00:00Z", // Will be set properly when we add time import
+		Timestamp: time.Now().Format("2006-01-02T15:04:05Z07:00"),
 		UserID:    userID,
 	}
 }
