@@ -16,6 +16,14 @@ class WebSocketClient {
         this.onClose = this.onClose.bind(this);
         this.onError = this.onError.bind(this);
 
+        // Register user stats handler
+        this.onMessage('user_stats', (data) => {
+            console.log('Received user stats:', data);
+            if (window.authManager && typeof window.authManager.updateUserStats === 'function') {
+                window.authManager.updateUserStats(data.data);
+            }
+        });
+
         // Add page unload handler for graceful disconnect
         this.setupPageUnloadHandler();
     }
