@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"log"
 	"sync"
+
+	"github.com/Tomlee-abila/real_time_forum/backend/internal/database"
 )
 
 // BroadcastMessage represents a message to be broadcast
@@ -215,4 +217,18 @@ func (h *Hub) GetOnlineUserDetails() []map[string]interface{} {
 		})
 	}
 	return users
+}
+
+// broadcastUserStats broadcasts current user statistics to all clients
+func (h *Hub) broadcastUserStats() {
+	totalUsers, err := database.GetTotalUserCount()
+	if err != nil {
+		log.Printf("Error getting total user count: %v", err)
+		return
+	}
+	onlineUsers := h.GetOnlineUserCount()
+	offlineUsers := totalUsers - onlineUsers
+
+	statsEvent := CreateUserStatsEvent(totalUsers, onlineUsers, offlineUsers)
+	h.sendToAll(statsEvent)
 }
