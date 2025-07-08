@@ -11,6 +11,7 @@ const messageSearch = document.querySelector('#message-search')
 // THEME
 const theme = document.querySelector('#theme');
 const themeModal = document.querySelector('.customize-theme');
+const fontSizes = document.querySelectorAll('.choose-size span')
 
 // ==================== SIDEBAR ==========================
 
