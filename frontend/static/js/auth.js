@@ -308,6 +308,11 @@ class AuthManager {
         const onlineCount = document.getElementById('online-count');
         const offlineUsers = document.getElementById('offline-users');
 
+        // Ensure stats are numbers and not undefined
+        const total = stats.total_users || 0;
+        const online = stats.online_users || 0;
+        const offline = stats.offline_users || 0;
+
         if (totalUsers) {
             totalUsers.textContent = stats.total_users || 0;
             totalUsers.classList.remove('loading');
