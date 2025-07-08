@@ -39,12 +39,12 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    overflow: hidden;
+    overflow: auto;
 }
 
 .container {
     width: 100%;
-    max-width: 400px;
+    max-width: 1200px;
     padding: 2rem;
 }
 
@@ -131,6 +131,112 @@ form input:focus, form select:focus {
 }
 
 #logout-btn {
-    -margintop: 1.5rem;
+    margin-top: 1.5rem;
     width: 100%;
+}
+
+/* User Statistics */
+.user-stats {
+    background: var(--color-white);
+    padding: var(--card-padding);
+    border-radius: var(--card-border-radius);
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.user-stats h3 {
+    color: var(--color-dark);
+    margin-bottom: 1rem;
+}
+
+.stats-container {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    background: var(--color-light);
+    border-radius: calc(var(--card-border-radius) / 2);
+    min-width: 120px;
+    flex: 1;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--color-gray);
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--color-dark);
+}
+
+.stat-value.online {
+    color: var(--color-success);
+}
+
+.stat-value.loading {
+    color: var(--color-gray);
+    font-size: 1rem;
+}
+
+/* Online Users Display */
+.online-users-section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-gray);
+}
+
+.online-users-section h4 {
+    color: var(--color-dark);
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.online-users-display {
+    background: var(--color-white);
+    border-radius: calc(var(--card-border-radius) / 2);
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    min-height: 60px;
+}
+
+.loading-message {
+    color: var(--color-gray);
+    font-style: italic;
+    text-align: center;
+    padding: 1rem;
+}
+
+.online-user-tag {
+    display: inline-block;
+    background: var(--color-light);
+    color: var(--color-primary);
+    padding: 0.4rem 0.8rem;
+    margin: 0.2rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border: 1px solid var(--color-secondary);
+}
+
+.online-user-tag.current-user {
+    background: var(--color-success);
+    color: var(--color-white);
+    border-color: var(--color-success);
+}
+
+.no-users-message {
+    color: var(--color-gray);
+    text-align: center;
+    padding: 1rem;
+    font-style: italic;
 }
