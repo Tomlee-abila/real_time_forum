@@ -114,3 +114,12 @@ func CreateMessageEvent(message interface{}) *Event {
 		Message: message,
 	}, "")
 }
+
+// CreateUserStatsEvent creates a user stats event
+func CreateUserStatsEvent(totalUsers, onlineUsers, offlineUsers int) *Event {
+	return CreateEvent(EventUserStats, &UserStatsEvent{
+		TotalUsers:   totalUsers,
+		OnlineUsers:  onlineUsers,
+		OfflineUsers: offlineUsers,
+	}, "")
+}
