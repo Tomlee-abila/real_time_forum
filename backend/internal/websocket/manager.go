@@ -106,6 +106,9 @@ func (h *Hub) unregisterClient(client *Client) {
 		delete(h.userClients, client.GetUserID())
 		close(client.send)
 		log.Printf("Client unregistered: %s (%s)", client.GetNickname(), client.GetUserID())
+
+		// Broadcast updated user stats
+		h.broadcastUserStats()
 	}
 }
 
