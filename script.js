@@ -163,3 +163,53 @@ colorPalette.forEach(color => {
 
     })
 })
+
+
+// theme BACKGROUND values
+let lightColorLightness;
+let whiteColorLightness;
+let darkColorLightness;
+
+// changes background color
+const changeBG = () => {
+    root.style.setProperty('--light-color-lightness', lightColorLightness);
+    root.style.setProperty('--white-color-lightness', whiteColorLightness);
+    root.style.setProperty('--dark-color-lightness', darkColorLightness);
+}
+
+// change background colors
+Bg1.addEventListener('click', () => {
+    darkColorLightness = '17%';
+    whiteColorLightness = '100%';
+    lightColorLightness = '95%';
+    // add active class
+    Bg1.classList.add('active');
+    // remove active class from the others
+    Bg2.classList.remove('active');
+    Bg3.classList.remove('active');
+    changeBG();
+});
+
+Bg2.addEventListener('click', () => {
+    darkColorLightness = '95%';
+    whiteColorLightness = '20%';
+    lightColorLightness = '15%';
+    // add active class
+    Bg2.classList.add('active');
+    // remove active class from the others
+    Bg1.classList.remove('active');
+    Bg3.classList.remove('active');
+    changeBG();
+});
+
+Bg3.addEventListener('click', () => {
+    darkColorLightness = '95%';
+    whiteColorLightness = '10%';
+    lightColorLightness = '0%';
+    // add active class
+    Bg3.classList.add('active');
+    // remove active class from others
+    Bg1.classList.remove('active');
+    Bg2.classList.remove('active');
+    changeBG();
+})
