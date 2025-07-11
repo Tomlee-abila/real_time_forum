@@ -228,16 +228,32 @@
                     <!----------------- END OF STORIES ---------------->
 
                     <!----------------- CREAT POST ---------------->
-                    <form class="create-post">
+                    <form class="create-post extended-create-post">
                         <div class="profile-photo">
-                            <img src="./images/profile-1.jpg">
+                            <img src="./images/profile-1.jpg" alt="Profile">
                         </div>
-                        <input type="text"
-                            placeholder="What's on your mind, Diana?"
-                            id="create-post">
-                        <input type="submit" value="Post"
-                            class="btn btn-primary">
+
+                        <div class="post-fields">
+                            <input type="text" placeholder="Title of your post" name="post-title" class="post-title" required>
+
+                            <textarea placeholder="What's on your mind, Diana?" name="post-body" class="post-body" rows="4" required></textarea>
+
+                            <input type="file" name="post-image" accept="image/*" class="post-image">
+
+                            <div class="post-categories">
+                                <span>Select categories:</span>
+                                <label><input type="checkbox" name="categories" value="News"> News</label>
+                                <label><input type="checkbox" name="categories" value="Technology"> Technology</label>
+                                <label><input type="checkbox" name="categories" value="Lifestyle"> Lifestyle</label>
+                                <label><input type="checkbox" name="categories" value="Entertainment"> Entertainment</label>
+                                <label><input type="checkbox" name="categories" value="Education"> Education</label>
+                            </div>
+
+                            <input type="submit" value="Post" class="btn btn-primary">
+                        </div>
                     </form>
+
+
                     <!----------------- END OF CREAT POST ---------------->
 
                     <!----------------- FEEDS ---------------->
