@@ -1,8 +1,64 @@
-<div class="container hidden" id="forum-page">
-    <div class="form-container">
-        <h1>Welcome to the Forum!</h1>
-        <p>This is premium stuff.</p>
-        <p>Welcome, <span id="welcome-nickname"></span>!</p>
-        <button id="logout-btn" class="btn btn-primary">Logout</button>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forum Home</title>
+</head>
+<body>
+    <div class="view" id="home-view">
+        <div class="navbar">
+            <div class="nav-container">
+                <span class="nav-title">Real Time Forum</span>
+                <div id="nav-links" class="nav-links">
+                    <span class="nav-status">Welcome, <span id="user-nickname">Guest</span>!</span>
+                    <button id="logout-btn" class="btn btn-secondary">Logout</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="dashboard">
+                <h2>Welcome to the Forum!</h2>
+
+                <div class="user-stats">
+                    <h3>User Statistics</h3>
+                    <div class="stats-container">
+                        <div class="stat-item">
+                            <span class="stat-label">Total Users</span>
+                            <span id="total-users" class="stat-value loading">Loading...</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Online Users</span>
+                            <span id="online-users" class="stat-value loading online">Loading...</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Offline Users</span>
+                            <span id="offline-users" class="stat-value loading">Loading...</span>
+                        </div>
+                    </div>
+                    <div class="online-users-section">
+                        <h4>Online Users</h4>
+                        <div id="online-users-display" class="online-users-display">
+                            <div class="loading-message">Loading online users...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="user-info">
+                    <h3>User Details</h3>
+                    <div id="user-details"></div>
+                </div>
+
+                <div class="tab-navigation">
+                    <button id="posts-tab" class="tab-btn active">Posts</button>
+                    <button id="messages-tab" class="tab-btn">Messages</button>
+                </div>
+
+                <div id="posts-section" class="content-section"></div>
+                <div id="messages-section" class="content-section hidden"></div>
+            </div>
+        </div>
     </div>
-</div>
+</body>
+</html>

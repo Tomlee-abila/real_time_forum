@@ -177,6 +177,56 @@ func GetTotalUserCount() (int, error) {
 	return count, nil
 }
 
+// GetActiveSessionUsers returns users with active (non-expired) sessions
+func GetActiveSessionUsers() ([]map[string]interface{}, error) {
+	query := `
+		SELECT DISTINCT u.id, u.nickname, u.email
+		FROM users u
+		INNER JOIN sessions s ON u.id = s.user_id
+		WHERE s.expires_at > ?
+		ORDER BY u.nickname
+	`
+
+	rows, err := DB.Query(query, time.Now())
+	if err != nil {
+		return nil, fmt.Errorf("failed to get active session users: %w", err)
+	}
+	defer rows.Close()
+
+	var users []map[string]interface{}
+	for rows.Next() {
+		var userID, nickname, email string
+		if err := rows.Scan(&userID, &nickname, &email); err != nil {
+			return nil, fmt.Errorf("failed to scan user: %w", err)
+		}
+
+		users = append(users, map[string]interface{}{
+			"user_id":   userID,
+			"nickname":  nickname,
+			"email":     email,
+			"connected": true, // They have active sessions
+		})
+	}
+
+	return users, nil
+}
+
+// GetActiveSessionCount returns the count of users with active sessions
+func GetActiveSessionCount() (int, error) {
+	query := `
+		SELECT COUNT(DISTINCT user_id)
+		FROM sessions
+		WHERE expires_at > ?
+	`
+
+	var count int
+	err := DB.QueryRow(query, time.Now()).Scan(&count)
+	if err != nil {
+		return 0, fmt.Errorf("failed to get active session count: %w", err)
+	}
+	return count, nil
+}
+
 // Helper function to validate email format
 func isValidEmail(email string) bool {
 	// Simple email validation - you can use the same regex from models

@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"log"
 	"sync"
+
+	"github.com/Tomlee-abila/real_time_forum/backend/internal/database"
 )
 
 // BroadcastMessage represents a message to be broadcast
@@ -66,14 +68,33 @@ func (h *Hub) registerClient(client *Client) {
 	h.mutex.Lock()
 	defer h.mutex.Unlock()
 
-	h.clients[client] = true
-	h.userClients[client.GetUserID()] = client
+	userID := client.GetUserID()
 
-	log.Printf("Client registered: %s (%s)", client.GetNickname(), client.GetUserID())
+	// Check if user already has a connection
+	if existingClient, exists := h.userClients[userID]; exists {
+		log.Printf("User %s (%s) already connected, closing existing connection", client.GetNickname(), userID)
+
+		// Clean up existing client
+		delete(h.clients, existingClient)
+		delete(h.userClients, userID)
+		close(existingClient.send)
+
+		// Note: We don't send disconnect events here to avoid confusion
+		// The old connection will be cleaned up naturally
+	}
+
+	// Register new client
+	h.clients[client] = true
+	h.userClients[userID] = client
+
+	log.Printf("Client registered: %s (%s)", client.GetNickname(), userID)
 
 	// Send connected event to client
-	connectedEvent := CreateConnectedEvent(client.GetUserID())
+	connectedEvent := CreateConnectedEvent(userID)
 	h.sendToClient(client, connectedEvent)
+
+	// Broadcast updated user stats
+	h.broadcastUserStats()
 }
 
 // unregisterClient unregisters a client
@@ -86,6 +107,9 @@ func (h *Hub) unregisterClient(client *Client) {
 		delete(h.userClients, client.GetUserID())
 		close(client.send)
 		log.Printf("Client unregistered: %s (%s)", client.GetNickname(), client.GetUserID())
+
+		// Broadcast updated user stats
+		h.broadcastUserStats()
 	}
 }
 
@@ -192,4 +216,18 @@ func (h *Hub) GetOnlineUserDetails() []map[string]interface{} {
 		})
 	}
 	return users
+}
+
+// broadcastUserStats broadcasts current user statistics to all clients
+func (h *Hub) broadcastUserStats() {
+	totalUsers, err := database.GetTotalUserCount()
+	if err != nil {
+		log.Printf("Error getting total user count: %v", err)
+		return
+	}
+	onlineUsers := h.GetOnlineUserCount()
+	offlineUsers := totalUsers - onlineUsers
+
+	statsEvent := CreateUserStatsEvent(totalUsers, onlineUsers, offlineUsers)
+	h.sendToAll(statsEvent)
 }

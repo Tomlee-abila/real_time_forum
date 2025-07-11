@@ -5,6 +5,7 @@ class MessagingManager {
         this.currentConversation = null;
         this.conversations = new Map();
         this.onlineUsers = new Set();
+        this.onlineUserNicknames = new Map(); // Store user ID -> nickname mapping
         this.messageHistory = new Map();
         this.isTyping = false;
         this.typingTimeout = null;
@@ -26,8 +27,8 @@ class MessagingManager {
         console.log('Initializing MessagingManager');
         this.setupWebSocket();
         this.setupEventListeners();
-        this.loadConversations();
-        this.loadOnlineUsers();
+        // Don't load conversations and online users until user is logged in
+        // These will be called from auth.js after successful login
     }
 
     // Setup WebSocket connection and handlers
@@ -51,10 +52,19 @@ class MessagingManager {
                 onDisconnect: () => this.onWebSocketDisconnect()
             });
 
-            // Connect to WebSocket
-            this.wsClient.connect();
+            // Don't auto-connect - will be called after user login
         } else {
             console.error('WebSocketClient not available');
+        }
+    }
+
+    // Start WebSocket connection (called after user login)
+    startWebSocketConnection() {
+        if (this.wsClient && !this.wsClient.isConnected) {
+            console.log('Starting WebSocket connection after login');
+            this.wsClient.connect();
+            this.loadConversations();
+            this.loadOnlineUsers();
         }
     }
 
@@ -153,10 +163,15 @@ class MessagingManager {
         if (data.data && data.data.user_status) {
             const user = data.data.user_status;
             this.onlineUsers.add(user.user_id);
+            // Store nickname if provided
+            if (user.nickname) {
+                this.onlineUserNicknames.set(user.user_id, user.nickname);
+            }
             this.updateOnlineUsersList();
             this.updateUserStatusInConversations(user.user_id, true);
-            this.updateOnlineUserCount();
             this.refreshOnlineUsersDisplay();
+            // Refresh global statistics from server
+            this.refreshUserStats();
         }
     }
 
@@ -166,10 +181,13 @@ class MessagingManager {
         if (data.data && data.data.user_status) {
             const user = data.data.user_status;
             this.onlineUsers.delete(user.user_id);
+            // Keep nickname in cache for potential reconnection
+            // this.onlineUserNicknames.delete(user.user_id);
             this.updateOnlineUsersList();
             this.updateUserStatusInConversations(user.user_id, false);
-            this.updateOnlineUserCount();
             this.refreshOnlineUsersDisplay();
+            // Refresh global statistics from server
+            this.refreshUserStats();
         }
     }
 
@@ -325,10 +343,12 @@ class MessagingManager {
             if (response.ok) {
                 const data = await response.json();
                 this.onlineUsers.clear();
+                this.onlineUserNicknames.clear();
 
                 if (data.users) {
                     data.users.forEach(user => {
                         this.onlineUsers.add(user.user_id);
+                        this.onlineUserNicknames.set(user.user_id, user.nickname);
                     });
                 }
 
@@ -569,7 +589,9 @@ class MessagingManager {
 
         const name = document.createElement('div');
         name.className = 'user-name';
-        name.textContent = `User ${userId}`; // This should be the actual nickname
+        // Use actual nickname from stored data
+        const nickname = this.onlineUserNicknames.get(userId) || `User ${userId}`;
+        name.textContent = nickname;
 
         const indicator = document.createElement('div');
         indicator.className = 'online-indicator';
@@ -592,7 +614,9 @@ class MessagingManager {
         if (inputArea) inputArea.classList.remove('hidden');
 
         if (userName) {
-            userName.textContent = `User ${userId}`; // Should be actual nickname
+            // Use actual nickname from stored data
+            const nickname = this.onlineUserNicknames.get(userId) || `User ${userId}`;
+            userName.textContent = nickname;
         }
 
         if (userStatus) {
@@ -766,27 +790,19 @@ class MessagingManager {
         }
     }
 
-    // Update online user count in statistics
-    updateOnlineUserCount() {
-        const onlineUsersElement = document.getElementById('online-users');
-        const onlineCountElement = document.getElementById('online-count');
 
-        if (onlineUsersElement) {
-            const count = this.onlineUsers.size;
-            onlineUsersElement.textContent = count;
-            onlineUsersElement.classList.remove('loading');
-        }
-
-        if (onlineCountElement) {
-            const count = this.onlineUsers.size;
-            onlineCountElement.textContent = count;
-        }
-    }
 
     // Refresh online users display by calling the auth manager
     refreshOnlineUsersDisplay() {
         if (window.authManager && typeof window.authManager.loadOnlineUsers === 'function') {
             window.authManager.loadOnlineUsers();
+        }
+    }
+
+    // Refresh user statistics by calling the auth manager
+    refreshUserStats() {
+        if (window.authManager && typeof window.authManager.loadUserStats === 'function') {
+            window.authManager.loadUserStats();
         }
     }
 }

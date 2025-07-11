@@ -3,6 +3,7 @@
 class AuthManager {
     constructor() {
         this.currentUser = null;
+        this.statsRefreshInterval = null;
         this.init();
     }
 
@@ -84,7 +85,8 @@ class AuthManager {
                 this.showView('home');
                 this.updateUserInfo(result.user);
                 this.loadUserStats(); // Load user statistics
-                this.loadOnlineUsers(); // Load online users list
+                this.startStatsRefresh(); // Start periodic statistics refresh
+                this.startMessagingSystem(); // Start WebSocket and load messaging data
                 form.reset();
             } else {
                 // Login failed
@@ -154,12 +156,14 @@ class AuthManager {
             if (response.ok) {
                 // Logout successful
                 this.currentUser = null;
+                this.disconnectMessagingSystem();
                 this.showView('login');
                 this.clearUserInfo();
             } else {
                 console.error('Logout failed:', result.error);
                 // Even if logout fails on server, clear client state
                 this.currentUser = null;
+                this.disconnectMessagingSystem();
                 this.showView('login');
                 this.clearUserInfo();
             }
@@ -167,15 +171,17 @@ class AuthManager {
             console.error('Logout error:', error);
             // Even if network error, clear client state
             this.currentUser = null;
+            this.disconnectMessagingSystem();
             this.showView('login');
             this.clearUserInfo();
         }
     }
 
     checkAuthStatus() {
-        // For now, just show login view
-        // In a real implementation, you might check for a valid session
+        // Always show login view initially - no automatic login
+        // Users must explicitly log in each time they visit
         this.showView('login');
+        console.log('Showing login view - no automatic login');
     }
 
     showView(viewName) {
@@ -225,8 +231,57 @@ class AuthManager {
             userDetails.innerHTML = '';
         }
         window.currentUserId = null; // Clear for messaging system
+        this.stopStatsRefresh(); // Stop periodic statistics refresh
         this.clearUserStats(); // Clear user statistics
         this.clearOnlineUsers(); // Clear online users list
+    }
+
+    // Start messaging system after login
+    startMessagingSystem() {
+        // Ensure messaging manager is available
+        if (!window.messagingManager) {
+            console.log('Messaging manager not ready, retrying in 100ms...');
+            setTimeout(() => this.startMessagingSystem(), 100);
+            return;
+        }
+
+        console.log('Starting messaging system...');
+
+        // Start WebSocket connection
+        if (typeof window.messagingManager.startWebSocketConnection === 'function') {
+            window.messagingManager.startWebSocketConnection();
+        } else {
+            console.error('startWebSocketConnection method not found');
+        }
+
+        // Load online users list
+        this.loadOnlineUsers();
+    }
+
+    // Disconnect messaging system on logout
+    disconnectMessagingSystem() {
+        // Disconnect WebSocket
+        if (window.messagingManager && window.messagingManager.wsClient) {
+            window.messagingManager.wsClient.disconnect();
+        }
+    }
+
+    // Start periodic statistics refresh
+    startStatsRefresh() {
+        // Refresh statistics every 30 seconds
+        this.statsRefreshInterval = setInterval(() => {
+            this.loadUserStats();
+        }, 30000);
+        console.log('Started periodic statistics refresh (30s interval)');
+    }
+
+    // Stop periodic statistics refresh
+    stopStatsRefresh() {
+        if (this.statsRefreshInterval) {
+            clearInterval(this.statsRefreshInterval);
+            this.statsRefreshInterval = null;
+            console.log('Stopped periodic statistics refresh');
+        }
     }
 
     // Load user statistics from API
@@ -252,6 +307,11 @@ class AuthManager {
         const onlineUsers = document.getElementById('online-users');
         const onlineCount = document.getElementById('online-count');
         const offlineUsers = document.getElementById('offline-users');
+
+        // Ensure stats are numbers and not undefined
+        const total = stats.total_users || 0;
+        const online = stats.online_users || 0;
+        const offline = stats.offline_users || 0;
 
         if (totalUsers) {
             totalUsers.textContent = stats.total_users || 0;

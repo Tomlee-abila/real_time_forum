@@ -1,5 +1,7 @@
 package websocket
 
+import "time"
+
 // EventType represents different types of WebSocket events
 type EventType string
 
@@ -14,6 +16,7 @@ const (
 	EventUserOnline  EventType = "user_online"
 	EventUserOffline EventType = "user_offline"
 	EventUserList    EventType = "user_list"
+	EventUserStats   EventType = "user_stats"
 
 	// System events
 	EventError        EventType = "error"
@@ -72,12 +75,19 @@ type MessageReadEvent struct {
 	MessageIDs []string `json:"message_ids,omitempty"`
 }
 
+// UserStatsEvent represents user statistics
+type UserStatsEvent struct {
+	TotalUsers   int `json:"total_users"`
+	OnlineUsers  int `json:"online_users"`
+	OfflineUsers int `json:"offline_users"`
+}
+
 // CreateEvent creates a new WebSocket event
 func CreateEvent(eventType EventType, data interface{}, userID string) *Event {
 	return &Event{
 		Type:      eventType,
 		Data:      data,
-		Timestamp: "2025-01-01T00:00:00Z", // Will be set properly when we add time import
+		Timestamp: time.Now().Format("2006-01-02T15:04:05Z07:00"),
 		UserID:    userID,
 	}
 }
@@ -102,5 +112,14 @@ func CreateConnectedEvent(userID string) *Event {
 func CreateMessageEvent(message interface{}) *Event {
 	return CreateEvent(EventNewMessage, &MessageEvent{
 		Message: message,
+	}, "")
+}
+
+// CreateUserStatsEvent creates a user stats event
+func CreateUserStatsEvent(totalUsers, onlineUsers, offlineUsers int) *Event {
+	return CreateEvent(EventUserStats, &UserStatsEvent{
+		TotalUsers:   totalUsers,
+		OnlineUsers:  onlineUsers,
+		OfflineUsers: offlineUsers,
 	}, "")
 }
