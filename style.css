@@ -111,7 +111,7 @@ nav .container {
 
 .search-bar input[type="search"] {
     background: transparent;
-    width: 30w;
+    width: 30%;
     margin-left: 1rem;
     font-size: 0.9rem;
     color: var(--color-dark);
