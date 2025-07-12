@@ -241,6 +241,7 @@ main .container .left .profile {
 
 /*------------- NOTIFICATION POPUP ------------- */
 .left .notifications-popup {
+    box-shadow: 0 0 1rem var(--color-primary);
     position: absolute;
     top: 0;
     left: 110%;
@@ -563,7 +564,7 @@ main .container .right {
     font-size: 0.8rem;
 }
 
-.messages .message .profile-photo .active {
+.messages .message .profile-photo .online {
     width: 1rem;
     height: 1rem;
     border-radius: 50%;
