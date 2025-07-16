@@ -64,7 +64,7 @@
 
                             <!----------------- NOTIFICATION POPUP ---------------->
                             <div class="notifications-popup">
-                                <div class="messages">
+                                <div class="messages" style="display: none;">
                                     <!------------------ SEARCH BAR ------------------>
                                     <div class="search-bar">
                                         <i class="uil uil-search"></i>
@@ -76,13 +76,14 @@
                                     <!------------------ MESSAGE 1 ------------------>
                                     <div class="message">
                                         <div class="profile-photo">
+                                            <small class="notification-count">6</small>
                                             <img src="./images/profile-17.jpg">
                                             <div class="online"></div>
                                         </div>
                                         <div class="message-body">
                                             <h5>Brian Otieno</h5>
                                             <p class="text-muted">Just woke up bruhk</p>
-                                        </div>
+                                        </div>                                        
                                     </div>
 
                                     <!------------------ MESSAGE 2 ------------------>
@@ -130,6 +131,29 @@
                                     </div>
 
                                 </div>
+                                
+                                <!-- CHAT SCREEN -->
+                                <div class="chat-view">
+                                    <!-- Chat Header -->
+                                    <div class="chat-header">
+                                        <span class="back" onclick="goBack()">←</span>
+                                        <h4 id="chatTitle">Chat</h4>
+                                    </div>
+                                
+                                    <!-- Chat Messages -->
+                                    <div class="chat-messages" id="chatMessages">
+                                        <!-- Chat bubbles will go here -->
+                                        <div class="bubble sent">Hey there!<span class="msg-time">10:32 AM</span></div>
+                                        <div class="bubble received">What’s up?<span class="msg-time">10:35 AM</span></div>
+                                    </div>
+                                
+                                    <!-- Chat Input -->
+                                    <div class="chat-input">
+                                        <input type="text" id="chatInput" placeholder="Type a message...">
+                                        <button onclick="sendMessage()">Send</button>
+                                    </div>
+                                </div>
+  
                             </div>
                             <!----------------- NOTIFICATION POPUP ---------------->
 

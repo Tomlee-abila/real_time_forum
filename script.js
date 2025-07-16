@@ -71,6 +71,41 @@ messagesNotification.addEventListener('click', () => {
     }, 2000);
 })
 
+function openChat(name) {
+    document.getElementById('chatTitle').textContent = name;
+    document.getElementById('chatApp').classList.add('show-chat');
+    document.getElementById('chatMessages').innerHTML = ''; // Clear previous chat
+  }
+
+  function goBack() {
+    document.getElementById('chatApp').classList.remove('show-chat');
+  }
+
+  function getCurrentTime() {
+    const now = new Date();
+    let hours = now.getHours();
+    const minutes = now.getMinutes().toString().padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12;
+    return `${hours}:${minutes} ${ampm}`;
+  }
+
+  function sendMessage() {
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if (text !== '') {
+      const bubble = document.createElement('div');
+      bubble.className = 'bubble sent'; // Add 'sent' class
+      bubble.innerHTML = `
+        ${text}
+        <span class="msg-time">${getCurrentTime()}</span>
+      `;
+      document.getElementById('chatMessages').appendChild(bubble);
+      input.value = '';
+      document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+    }
+  }
+
 
 // THEME/DISPLAY CUSTOMIZATION
 
