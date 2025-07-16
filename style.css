@@ -49,15 +49,14 @@ body {
 }
 
 .profile-photo {
-    width: 2.7rem;
-    aspect-ratio: 1/1;
-    border-radius: 50%;
-    overflow: hidden;
+    width: 3rem;
+    position: relative;
 }
 
-img {
+.profile-photo img {
     display: block;
     width: 100%;
+    border-radius: 50%;
 }
 
 .btn {
@@ -368,10 +367,6 @@ main .container .left .profile {
     gap: 1rem;
 }
 
-.extended-create-post .profile-photo {
-    margin-bottom: 0.5rem;
-}
-
 .post-fields {
     width: 100%;
     display: flex;
@@ -536,15 +531,6 @@ main .container .right {
     align-items: start;
 }
 
-.message .profile-photo {
-    position: relative;
-    overflow: visible;
-}
-
-.message .profile-photo img {
-    border-radius: 50%;
-}
-
 .messages .message:last-child {
     margin: 0;
 }
@@ -553,7 +539,7 @@ main .container .right {
     font-size: 0.8rem;
 }
 
-.messages .message .profile-photo .online {
+.profile-photo .online {
     width: 1rem;
     height: 1rem;
     border-radius: 50%;
