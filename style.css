@@ -509,6 +509,12 @@ main .container .right {
     max-height: 20rem;
 }
 
+.quiteMsg {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+}
+
 .messages i {
     font-size: 1.4rem;
 }
@@ -911,7 +917,7 @@ MEDIA QUERIES FOR SMALL TABLETSTABLETSmessagemessage AND MOBILE PHONES
     }
 
     main .container {
-        grid-template-columns: 0 auto 5rem;
+        grid-template-columns: 0 auto 0;
         gap: 0;
     }
 

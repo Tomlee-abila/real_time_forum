@@ -1,5 +1,6 @@
 // SIDEBAR
 const menuItems = document.querySelectorAll('.menu-item');
+const msgNotification = document.querySelectorAll('.menu-item#notifications .pop');
 
 // MESSAGES
 const messages = document.querySelector('.messages');
@@ -33,8 +34,7 @@ menuItems.forEach(item => {
         changeActiveItem();
         item.classList.add('active');
         if (item.id == 'notifications') {
-            document.querySelector('.notifications-popup').
-            style.display = 'block';
+            
         } else {
             document.querySelector('.notifications-popup').
                 style.display = 'none';
@@ -45,6 +45,21 @@ menuItems.forEach(item => {
 
 
 // ==================== MESSAGES ==========================
+
+// open message notification
+msgNotification.forEach(item => {
+    item.addEventListener('click', () => {
+        if (document.querySelector('.notifications-popup').
+                style.display == 'block') {
+            document.querySelector('.notifications-popup').
+                style.display = 'none';
+        } else {
+            document.querySelector('.notifications-popup').
+                style.display = 'block';
+        }
+    })
+})
+
 // searches chats
 const searchMessage = () => {
     const val = messageSearch.value.toLowerCase();
@@ -60,6 +75,13 @@ const searchMessage = () => {
 }
 // search chat
 messageSearch.addEventListener('keyup', searchMessage);
+
+// quite message
+const quiteMsg = () => {
+    console.log('quite');
+    document.querySelector('.notifications-popup').
+            style.display = 'none';
+}
 
 // open chat
 message.forEach(user => {
