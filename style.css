@@ -534,6 +534,7 @@ main .container .right {
     gap: 1rem;
     margin-bottom: 1rem;
     align-items: start;
+    cursor: pointer;
 }
 
 .message .profile-photo {
