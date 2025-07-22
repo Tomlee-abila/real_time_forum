@@ -67,18 +67,20 @@ message.forEach(user => {
         messages.style.display = 'none';
         chatView.style.display = 'flex';
         let name = user.querySelector('h5').textContent;
-        openChat(name);
+        let imgSrc = user.querySelector('img').src;
+        openChat(name, imgSrc);
     })
 })
 
-function openChat(name) {
+function openChat(name, imgSrc) {
     document.getElementById('chatTitle').textContent = name;
-    document.getElementById('chatApp').classList.add('show-chat');
-    chatMessages.innerHTML = ''; // Clear previous chat
+    chatView.querySelector('#chatPhoto').src = imgSrc;
+    // chatMessages.innerHTML = ''; // Clear previous chat
   }
 
   function goBack() {
-    document.getElementById('chatApp').classList.remove('show-chat');
+    messages.style.display = 'block';
+    chatView.style.display = 'none';
   }
 
   function getCurrentTime() {
