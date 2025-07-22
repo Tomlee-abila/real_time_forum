@@ -50,9 +50,9 @@ const searchMessage = () => {
     message.forEach(user => {
         let name = user.querySelector('h5').textContent.toLocaleLowerCase();
         if (name.indexOf(val) != -1) {
-            chat.style.display = 'flex';
+            user.style.display = 'flex';
         } else {
-            chat.style.display = 'none';
+            user.style.display = 'none';
         }
     })
 }
