@@ -2,8 +2,6 @@
 const menuItems = document.querySelectorAll('.menu-item');
 
 // MESSAGES
-const messagesNotification = document.querySelector
-    ('#messages-notification');
 const messages = document.querySelector('.messages');
 const message = document.querySelectorAll('.message')
 const messageSearch = document.querySelector('#message-search')
@@ -60,16 +58,6 @@ const searchMessage = () => {
 }
 // search chat
 messageSearch.addEventListener('keyup', searchMessage);
-
-// hightlight messages card when messages menu items is clicked
-messagesNotification.addEventListener('click', () => {
-    messages.style.boxShadow = '0 0 1rem var(--color-primary)';
-    messagesNotification.querySelector('.notification-count').style.display
-        = 'none';
-    setTimeout(() => {
-        messages.style.boxShadow = 'none';
-    }, 2000);
-})
 
 function openChat(name) {
     document.getElementById('chatTitle').textContent = name;
