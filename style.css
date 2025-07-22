@@ -502,6 +502,13 @@ main .container .right {
     margin-bottom: 1rem;
 }
 
+.messages .body{
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+    max-height: 20rem;
+}
+
 .messages i {
     font-size: 1.4rem;
 }

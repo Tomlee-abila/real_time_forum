@@ -32,13 +32,13 @@ menuItems.forEach(item => {
     item.addEventListener('click', () => {
         changeActiveItem();
         item.classList.add('active');
-        if (item.id != 'notifications') {
+        if (item.id == 'notifications') {
             document.querySelector('.notifications-popup').
-                style.display = 'none';
+            style.display = 'block';
         } else {
             document.querySelector('.notifications-popup').
-                style.display = 'block';
-            document.querySelector('#notifications .notification-count').style.display = 'none';
+                style.display = 'none';
+            // document.querySelector('#notifications .notification-count').style.display = 'none';
         }
     })
 })
