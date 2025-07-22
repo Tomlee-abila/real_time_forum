@@ -5,6 +5,8 @@ const menuItems = document.querySelectorAll('.menu-item');
 const messages = document.querySelector('.messages');
 const message = document.querySelectorAll('.message')
 const messageSearch = document.querySelector('#message-search')
+const chatView = document.querySelector('.chat-view');
+const chatMessages = document.querySelector('.chat-messages');
 
 // THEME
 const theme = document.querySelector('#theme');
@@ -52,17 +54,27 @@ const searchMessage = () => {
         if (name.indexOf(val) != -1) {
             user.style.display = 'flex';
         } else {
-            user.style.display = 'none';
+            user    .style.display = 'none';
         }
     })
 }
 // search chat
 messageSearch.addEventListener('keyup', searchMessage);
 
+// open chat
+message.forEach(user => {
+    user.addEventListener('click', () => {
+        messages.style.display = 'none';
+        chatView.style.display = 'flex';
+        let name = user.querySelector('h5').textContent;
+        openChat(name);
+    })
+})
+
 function openChat(name) {
     document.getElementById('chatTitle').textContent = name;
     document.getElementById('chatApp').classList.add('show-chat');
-    document.getElementById('chatMessages').innerHTML = ''; // Clear previous chat
+    chatMessages.innerHTML = ''; // Clear previous chat
   }
 
   function goBack() {

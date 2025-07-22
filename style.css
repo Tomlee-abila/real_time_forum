@@ -175,7 +175,7 @@ main .container .left .profile {
     position: relative;
 }
 
-.left .sidebar .menu-item:hover {
+.left .sidebar .menu-item:hover, .message:hover {
     background: var(--color-light);
 }
 
@@ -593,6 +593,7 @@ main .container .right {
     padding: 1rem;
     display: flex;
     align-items: center;
+    gap: 0.5rem;
   }
   
   .chat-header .back {
