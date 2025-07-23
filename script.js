@@ -1,6 +1,5 @@
 // SIDEBAR
 const menuItems = document.querySelectorAll('.menu-item');
-const msgNotification = document.querySelectorAll('.menu-item#notifications .pop');
 
 // MESSAGES
 const messages = document.querySelector('.messages');
@@ -32,46 +31,35 @@ const changeActiveItem = () => {
 }
 
 menuItems.forEach(item => {
-    item.addEventListener('click', () => {
+    item.addEventListener('click', (e) => {
         changeActiveItem();
         item.classList.add('active');
-        if (item.id == 'notifications') {
-            
+
+        const notificationsPopup = document.querySelector('.notifications-popup');
+
+        if (item.id === 'notifications') {
+            if (!notificationsPopup.contains(e.target)) {
+                const isVisible = notificationsPopup.style.display === 'block';
+                notificationsPopup.style.display = isVisible ? 'none' : 'block';
+            }
         } else {
-            document.querySelector('.notifications-popup').
-                style.display = 'none';
-            // document.querySelector('#notifications .notification-count').style.display = 'none';
+            notificationsPopup.style.display = 'none';
         }
-    })
-})
+    });
+});
 
 
-// ==================== MESSAGES ==========================
 
-// open message notification
-msgNotification.forEach(item => {
-    item.addEventListener('click', () => {
-        if (document.querySelector('.notifications-popup').
-                style.display == 'block') {
-            document.querySelector('.notifications-popup').
-                style.display = 'none';
-        } else {
-            document.querySelector('.notifications-popup').
-                style.display = 'block';
-        }
-    })
-})
 
 // searches chats
 const searchMessage = () => {
     const val = messageSearch.value.toLowerCase();
-    console.log(val);
     message.forEach(user => {
         let name = user.querySelector('h5').textContent.toLocaleLowerCase();
         if (name.indexOf(val) != -1) {
             user.style.display = 'flex';
         } else {
-            user    .style.display = 'none';
+            user.style.display = 'none';
         }
     })
 }
@@ -80,9 +68,8 @@ messageSearch.addEventListener('keyup', searchMessage);
 
 // quite message
 const quiteMsg = () => {
-    console.log('quite');
     document.querySelector('.notifications-popup').
-            style.display = 'none';
+        style.display = 'none';
 }
 
 // open chat
@@ -100,37 +87,50 @@ function openChat(name, imgSrc) {
     document.getElementById('chatTitle').textContent = name;
     chatView.querySelector('#chatPhoto').src = imgSrc;
     // chatMessages.innerHTML = ''; // Clear previous chat
-  }
+}
 
-  function goBack() {
+function goBack() {
     messages.style.display = 'block';
     chatView.style.display = 'none';
-  }
+}
 
-  function getCurrentTime() {
+function getCurrentTime() {
     const now = new Date();
     let hours = now.getHours();
     const minutes = now.getMinutes().toString().padStart(2, '0');
     const ampm = hours >= 12 ? 'PM' : 'AM';
     hours = hours % 12 || 12;
     return `${hours}:${minutes} ${ampm}`;
-  }
+}
 
-  function sendMessage() {
+function sendMessage() {
     const input = document.getElementById('chatInput');
     const text = input.value.trim();
     if (text !== '') {
-      const bubble = document.createElement('div');
-      bubble.className = 'bubble sent'; // Add 'sent' class
-      bubble.innerHTML = `
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble sent'; // Add 'sent' class
+        bubble.innerHTML = `
         ${text}
         <span class="msg-time">${getCurrentTime()}</span>
       `;
-      document.getElementById('chatMessages').appendChild(bubble);
-      input.value = '';
-      document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+        document.getElementById('chatMessages').appendChild(bubble);
+        input.value = '';
+        document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
     }
-  }
+}
+
+// CREATE POST
+const openCreatePost = () => {
+    createPost.style.display = 'block';
+}
+
+const closeCreatePost = (e) => {
+    if (e.target.classList.contains('createPost')) {
+        createPost.style.display = 'none';
+    }
+}
+
+createPost.addEventListener('click', closeCreatePost);
 
 
 // THEME/DISPLAY CUSTOMIZATION
@@ -142,7 +142,9 @@ const openThemeModal = () => {
 
 // closes modal
 const closeThemeModal = (e) => {
-    themeModal.style.display = 'none';
+    if (e.target.classList.contains('customize-theme')) {
+        themeModal.style.display = 'none';
+    }
 }
 
 // close modal
