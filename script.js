@@ -20,6 +20,8 @@ const Bg2 = document.querySelector('.bg-2');
 const Bg3 = document.querySelector('.bg-3');
 
 
+const createPost = document.querySelector('.createPost');
+
 // ==================== SIDEBAR ==========================
 
 // remove active class from all menu items
@@ -140,9 +142,7 @@ const openThemeModal = () => {
 
 // closes modal
 const closeThemeModal = (e) => {
-    if (e.target.classList.contains('customize-theme')) {
-        themeModal.style.display = 'none';
-    }
+    themeModal.style.display = 'none';
 }
 
 // close modal
