@@ -946,6 +946,10 @@ MEDIA QUERIES FOR SMALL TABLETSTABLETSmessagemessage AND MOBILE PHONES
         grid-column: 1/3;
     }
 
+    main .container .sidebar{
+        box-shadow: 0 0 1rem var(--color-primary);
+    }
+
     main .container .right{
         display: none;
     }
