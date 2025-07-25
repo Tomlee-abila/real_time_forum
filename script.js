@@ -2,11 +2,11 @@
 const menuItems = document.querySelectorAll('.menu-item');
 
 // MESSAGES
-const messagesNotification = document.querySelector
-    ('#messages-notification');
 const messages = document.querySelector('.messages');
 const message = document.querySelectorAll('.message')
 const messageSearch = document.querySelector('#message-search')
+const chatView = document.querySelector('.chat-view');
+const chatMessages = document.querySelector('.chat-messages');
 
 // THEME
 const theme = document.querySelector('#theme');
@@ -19,6 +19,8 @@ const Bg2 = document.querySelector('.bg-2');
 const Bg3 = document.querySelector('.bg-3');
 
 
+const createPost = document.querySelector('.createPost');
+
 // ==================== SIDEBAR ==========================
 
 // remove active class from all menu items
@@ -29,82 +31,106 @@ const changeActiveItem = () => {
 }
 
 menuItems.forEach(item => {
-    item.addEventListener('click', () => {
+    item.addEventListener('click', (e) => {
         changeActiveItem();
         item.classList.add('active');
-        if (item.id != 'notifications') {
-            document.querySelector('.notifications-popup').
-                style.display = 'none';
+
+        const notificationsPopup = document.querySelector('.notifications-popup');
+
+        if (item.id === 'notifications') {
+            if (!notificationsPopup.contains(e.target)) {
+                const isVisible = notificationsPopup.style.display === 'block';
+                notificationsPopup.style.display = isVisible ? 'none' : 'block';
+            }
         } else {
-            document.querySelector('.notifications-popup').
-                style.display = 'block';
-            document.querySelector('#notifications .notification-count').style.display = 'none';
+            notificationsPopup.style.display = 'none';
         }
-    })
-})
+    });
+});
 
 
-// ==================== MESSAGES ==========================
+
+
 // searches chats
 const searchMessage = () => {
     const val = messageSearch.value.toLowerCase();
-    console.log(val);
     message.forEach(user => {
         let name = user.querySelector('h5').textContent.toLocaleLowerCase();
         if (name.indexOf(val) != -1) {
-            chat.style.display = 'flex';
+            user.style.display = 'flex';
         } else {
-            chat.style.display = 'none';
+            user.style.display = 'none';
         }
     })
 }
 // search chat
 messageSearch.addEventListener('keyup', searchMessage);
 
-// hightlight messages card when messages menu items is clicked
-messagesNotification.addEventListener('click', () => {
-    messages.style.boxShadow = '0 0 1rem var(--color-primary)';
-    messagesNotification.querySelector('.notification-count').style.display
-        = 'none';
-    setTimeout(() => {
-        messages.style.boxShadow = 'none';
-    }, 2000);
+// quite message
+const quiteMsg = () => {
+    document.querySelector('.notifications-popup').
+        style.display = 'none';
+}
+
+// open chat
+message.forEach(user => {
+    user.addEventListener('click', () => {
+        messages.style.display = 'none';
+        chatView.style.display = 'flex';
+        let name = user.querySelector('h5').textContent;
+        let imgSrc = user.querySelector('img').src;
+        openChat(name, imgSrc);
+    })
 })
 
-function openChat(name) {
+function openChat(name, imgSrc) {
     document.getElementById('chatTitle').textContent = name;
-    document.getElementById('chatApp').classList.add('show-chat');
-    document.getElementById('chatMessages').innerHTML = ''; // Clear previous chat
-  }
+    chatView.querySelector('#chatPhoto').src = imgSrc;
+    // chatMessages.innerHTML = ''; // Clear previous chat
+}
 
-  function goBack() {
-    document.getElementById('chatApp').classList.remove('show-chat');
-  }
+function goBack() {
+    messages.style.display = 'block';
+    chatView.style.display = 'none';
+}
 
-  function getCurrentTime() {
+function getCurrentTime() {
     const now = new Date();
     let hours = now.getHours();
     const minutes = now.getMinutes().toString().padStart(2, '0');
     const ampm = hours >= 12 ? 'PM' : 'AM';
     hours = hours % 12 || 12;
     return `${hours}:${minutes} ${ampm}`;
-  }
+}
 
-  function sendMessage() {
+function sendMessage() {
     const input = document.getElementById('chatInput');
     const text = input.value.trim();
     if (text !== '') {
-      const bubble = document.createElement('div');
-      bubble.className = 'bubble sent'; // Add 'sent' class
-      bubble.innerHTML = `
+        const bubble = document.createElement('div');
+        bubble.className = 'bubble sent'; // Add 'sent' class
+        bubble.innerHTML = `
         ${text}
         <span class="msg-time">${getCurrentTime()}</span>
       `;
-      document.getElementById('chatMessages').appendChild(bubble);
-      input.value = '';
-      document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+        document.getElementById('chatMessages').appendChild(bubble);
+        input.value = '';
+        document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
     }
-  }
+}
+
+// CREATE POST
+const openCreatePost = () => {
+    createPost.style.display = 'block';
+}
+
+const closeCreatePost = (e) => {
+    if (e.target.classList.contains('createPost')) {
+        createPost.style.display = 'none';
+    }
+}
+
+createPost.addEventListener('click', closeCreatePost);
 
 
 // THEME/DISPLAY CUSTOMIZATION
