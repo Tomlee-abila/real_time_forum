@@ -427,7 +427,7 @@
                 <div class="lg:w-2/4 w-full">
                     <div class="bg-white rounded-lg shadow-sm p-4 mb-6">
                         <div class="flex justify-between items-center mb-4">
-                            <h1 class="text-xl font-bold text-gray-800" id="current-category">General Discussion</h1>
+                            <h1 class="text-xl font-bold text-gray-800" id="current-category">All Posts</h1>
                             <button id="new-thread-btn"
                                 class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none"
@@ -804,7 +804,7 @@
         document.addEventListener('DOMContentLoaded', function () {
             // User state
             let currentUser = null;
-            let currentCategory = 'general';
+            let currentCategory = 'all';
             let currentThreadId = null;
             let conversations = [];
             let currentChatUser = null;
@@ -813,11 +813,11 @@
 
             // Sample data - categories
             const categoriesData = [
+                { id: 'all', name: 'All Posts', threadCount: 0 },
                 { id: 'general', name: 'General Discussion', threadCount: 0 },
                 { id: 'tech', name: 'Technology', threadCount: 0 },
                 { id: 'random', name: 'Random', threadCount: 0 },
-                { id: 'help', name: 'Help & Support', threadCount: 0 },
-                { id: 'all', name: 'All Posts', threadCount: 0 } // New "All Posts" category
+                { id: 'help', name: 'Help & Support', threadCount: 0 }                 
             ];
 
             // Sample data - registered users
@@ -1089,6 +1089,7 @@
                 updateCategoryThreadCounts();
                 renderCategories();
                 renderThreads();
+                switchCategory('all');
                 renderConversations();
                 populateMessageRecipients();
                 renderWelcomeCategories();
@@ -1176,6 +1177,7 @@
                     });
                 });
             }
+
 
             // Check if user is logged in
             function checkLoggedInUser() {
@@ -1631,6 +1633,7 @@
                 mobileMenu.classList.add('hidden');
                 isMobileMenuOpen = false;
             }
+            
             categoryBtns.forEach(btn => {
                 btn.addEventListener('click', function () {
                     const category = this.getAttribute('data-category');
@@ -2114,6 +2117,7 @@
 
             function getCategoryName(category) {
                 const names = {
+                    all: 'All Posts',
                     general: 'General Discussion',
                     tech: 'Technology',
                     random: 'Random',
